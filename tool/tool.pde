@@ -34,16 +34,18 @@ int mSegmentCounter = 0;
 int mLayerCounter = 0;
 
 Segment gLocked = null;
+boolean timeBarLock = false;
 
 boolean mouseDebug = false;
 
 ArrayList<Motor> motors = new ArrayList<Motor>();
 
 void setup() {
+  size(displayWidth, 400);
   colorMode(HSB, 360, 100, 100);
   println("### (AUTHORING_TOOL) welcome!");
   println("### (AUTHORING_TOOL) running the UserInterface with the help of ControlP5:");
-  size(displayWidth, 400);
+  
 
   cp5 = new ControlP5(this);
   println();
@@ -61,6 +63,7 @@ void draw() {
   for (Motor motor : motors) {
     motor.draw();
   }
+  timeline.update();
   timeline.draw();
   
   if(mouseDebug) {
@@ -84,4 +87,10 @@ void mouseDragged() {
 
 void mouseReleased() {
   timeline.mouseReleased();
+}
+
+void keyPressed() {
+  if (key == ' ') {
+      timeline.toggle();
+  }
 }

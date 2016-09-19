@@ -7,7 +7,7 @@ class Segment {
   float yOffset = 0.0;
   PVector mPosition;
   int mID = 0;
-  int mWidth = 200;
+  int mWidth = (int)random(50,200);
   int mGrab = -1;
   Layer mLayer;
   float mColor;
@@ -17,7 +17,7 @@ class Segment {
     
     this.mLayer = _mLayer;
     this.mColor = _mColor;
-    this.mPosition = new PVector(random(0, mLayer.mTranslation.x), mLayer.mTranslation.y);
+    this.mPosition = new PVector(random(mLayer.mTranslation.x, mLayer.mSize.x), mLayer.mTranslation.y);
     this.mDirection = _mDirection;
     this.mSpeed = _mSpeed;
     //mPosition = new PVector(0,0);
@@ -28,11 +28,11 @@ class Segment {
     if(gLocked == null) detect();
     pushStyle();
     //rectMode(CORNER);
-    stroke(255);
+    stroke(0, 0, 100);
     if(mHover) {
-      fill(mColor,50,70);
-      if(mLocked && mGrab == 0) fill(mColor,50,100);
-    } else fill(mColor,50,40); 
+      fill(mColor,70,70);
+      if(mLocked && mGrab == 0) fill(mColor,70,100);
+    } else fill(mColor,70,50); 
     
     
     rect(mPosition.x, mPosition.y, mWidth, 20);
@@ -62,7 +62,7 @@ class Segment {
   }
   
   void mousePressed() {
-    if(mHover && gLocked == null) { 
+    if(mHover && gLocked == null && !timeBarLock) { 
       mLocked = true;
       gLocked = this;
     } else {

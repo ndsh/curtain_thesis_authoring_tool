@@ -9,7 +9,7 @@ class Layer {
   boolean mLocked = false;
   PVector mOffset = new PVector(0,0);
   PVector mSize = new PVector(width-30, 20);
-  PVector mTranslation = new PVector(10,(mID+1)*10);
+  PVector mTranslation;
   float mColor;
   
   Layer() {
@@ -19,9 +19,10 @@ class Layer {
     this.mMotor = new Motor("Motor 1", 1, true);
     mID = mLayerCounter;
     mLayerCounter++;
+    mTranslation = new PVector(10,(mID+1)*30);
     println("### (LAYER) created");
-    add();
-    add();
+    float r = random(0,5);
+    for(float i = 0; i<r; i+=1.) add();
   }
   
   void add() {
@@ -33,8 +34,7 @@ class Layer {
   void draw() {
     pushStyle();
     noFill();
-    stroke(255);
- 
+    stroke(0, 0, 70);
     rect(mTranslation.x, mTranslation.y,mSize.x,mSize.y);
     popStyle();
     /*
@@ -69,10 +69,7 @@ class Layer {
   float getWidth() {
     return mWidth;
   }
-  
-  void hover() {
-    mHover = true;
-  }
+ 
   
   void mousePressed() {
     for (Segment segment : segments) {
