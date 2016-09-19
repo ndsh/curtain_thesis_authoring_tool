@@ -1,3 +1,8 @@
+class Light {
+  Light() {
+  }
+}
+
 class Motor {
   String mName;
   int mID;

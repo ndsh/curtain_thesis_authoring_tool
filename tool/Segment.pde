@@ -1,58 +1,73 @@
 class Segment {
-  PVector mPosition;
-  float mWidth;
-  Motor mMotor;
-  ArrayList<Motion> motions = new ArrayList<Motion>();
-  int mID;
-  boolean mSelected = false; // is currently active?
+  boolean mDirection;
+  int mSpeed;
   boolean mHover = false;
   boolean mLocked = false;
-  PVector mOffset = new PVector(0,0);
+  float xOffset = 0.0;
+  float yOffset = 0.0;
+  PVector mPosition;
+  int mID = 0;
+  int mWidth = 200;
+  Layer mLayer;
   
-  Segment() {
-    this.mPosition = new PVector(random(80,width-80), height/2);
-    this.mWidth = random(20,200);
-    this.mMotor = new Motor("Motor 1", 1, true);
-    mID = mSegmentCounter;
-    mSegmentCounter++;
+  
+  Segment(Layer _mLayer, boolean _mDirection, int _mSpeed) {
+    this.mLayer = _mLayer;
+    this.mPosition = new PVector(random(0, mLayer.mTranslation.x), mLayer.mTranslation.y);
+    this.mDirection = _mDirection;
+    this.mSpeed = _mSpeed;
+    //mPosition = new PVector(0,0);
     println("### (SEGMENT) created");
   }
   
-  void add() {
-    println("### (SEGMENT) adding new motion…");
-    motions.add(new Motion(true, 500));
-    
-  }
-  
   void draw() {
+    detect();
     pushStyle();
-    rectMode(CORNER);
+    //rectMode(CORNER);
     stroke(255);
-    if(mHover) fill(0,125,255);
-    else fill(0); 
+    if(mHover) {
+      fill(0,125,255);
+      if(mLocked) fill(0,255,0);
+    } else fill(0,160,160); 
+    
     
     rect(mPosition.x, mPosition.y, mWidth, 20);
-    fill(255);
-    text("#"+mID, mPosition.x, mPosition.y+5);
-    text(mPosition.x + "|" + mPosition.y, mPosition.x, mPosition.y+40);
+    fill(125);
+    //text("#"+mID, mPosition.x, mPosition.y+5);
+    //text(mPosition.x + "|" + mPosition.y, mPosition.x, mPosition.y+40);
     popStyle();
-    mHover = false;
+    //mHover = false;
   }
   
-  PVector getPosition() {
-    return mPosition;
+  void detect() {
+    if(gLocked == null) {
+      if (mouseX >= mPosition.x && mouseX <= mPosition.x+mWidth && 
+        mouseY >= mPosition.y && mouseY <= mPosition.y+20) mHover = true;
+      else mHover = false;
+    }
   }
   
-  void setPosition(PVector p) {
-    mPosition = p;
+  void mousePressed() {
+    if(mHover && gLocked == null) { 
+      mLocked = true;
+      gLocked = this;
+    } else {
+      mLocked = false;
+    }
+    xOffset = mouseX-mPosition.x; 
+    yOffset = mouseY-mPosition.y; 
   }
   
-  float getWidth() {
-    return mWidth;
+  void mouseDragged() {
+    if(mLocked && gLocked == this) {
+      println(mLayer.mSize.x);
+      mPosition.x = constrain(mouseX-xOffset, mLayer.mTranslation.x, (mLayer.mSize.x-mWidth));
+      //mPosition.y = mouseY-yOffset; 
+    }
   }
   
-  void hover() {
-    mHover = true;
+  void mouseReleased() {
+    mLocked = false;
+    if(gLocked == this) gLocked = null;
   }
-  
 }
