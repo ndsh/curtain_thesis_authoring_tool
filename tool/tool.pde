@@ -40,6 +40,7 @@ boolean mouseDebug = false;
 ArrayList<Motor> motors = new ArrayList<Motor>();
 
 void setup() {
+  colorMode(HSB, 360, 100, 100);
   println("### (AUTHORING_TOOL) welcome!");
   println("### (AUTHORING_TOOL) running the UserInterface with the help of ControlP5:");
   size(displayWidth, 400);

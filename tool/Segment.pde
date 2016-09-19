@@ -8,11 +8,15 @@ class Segment {
   PVector mPosition;
   int mID = 0;
   int mWidth = 200;
+  int mGrab = -1;
   Layer mLayer;
+  float mColor;
   
   
-  Segment(Layer _mLayer, boolean _mDirection, int _mSpeed) {
+  Segment(Layer _mLayer, boolean _mDirection, int _mSpeed, float _mColor) {
+    
     this.mLayer = _mLayer;
+    this.mColor = _mColor;
     this.mPosition = new PVector(random(0, mLayer.mTranslation.x), mLayer.mTranslation.y);
     this.mDirection = _mDirection;
     this.mSpeed = _mSpeed;
@@ -21,18 +25,20 @@ class Segment {
   }
   
   void draw() {
-    detect();
+    if(gLocked == null) detect();
     pushStyle();
     //rectMode(CORNER);
     stroke(255);
     if(mHover) {
-      fill(0,125,255);
-      if(mLocked) fill(0,255,0);
-    } else fill(0,160,160); 
+      fill(mColor,50,70);
+      if(mLocked && mGrab == 0) fill(mColor,50,100);
+    } else fill(mColor,50,40); 
     
     
     rect(mPosition.x, mPosition.y, mWidth, 20);
     fill(125);
+    rect(mPosition.x+mWidth-10, mPosition.y, 10, 20);
+    //text(mWidth, mPosition.x, mPosition.y+5);
     //text("#"+mID, mPosition.x, mPosition.y+5);
     //text(mPosition.x + "|" + mPosition.y, mPosition.x, mPosition.y+40);
     popStyle();
@@ -40,10 +46,18 @@ class Segment {
   }
   
   void detect() {
-    if(gLocked == null) {
-      if (mouseX >= mPosition.x && mouseX <= mPosition.x+mWidth && 
-        mouseY >= mPosition.y && mouseY <= mPosition.y+20) mHover = true;
-      else mHover = false;
+    if (mouseX >= mPosition.x && mouseX <= mPosition.x+mWidth && 
+      mouseY >= mPosition.y && mouseY <= mPosition.y+20) {
+        mHover = true;
+        // left corner
+        if (mouseX >= mPosition.x && mouseX <= mPosition.x+10 && 
+        mouseY >= mPosition.y && mouseY <= mPosition.y+20) mGrab = 1;
+        else if (mouseX >= (mPosition.x+mWidth)-10 && mouseX <= mPosition.x+mWidth && 
+        mouseY >= mPosition.y && mouseY <= mPosition.y+20) mGrab = 2;
+        else mGrab = 0;
+    } else {
+      mHover = false;
+      mGrab = -1;
     }
   }
   
@@ -54,14 +68,21 @@ class Segment {
     } else {
       mLocked = false;
     }
-    xOffset = mouseX-mPosition.x; 
+    xOffset = mouseX-mPosition.x;
     yOffset = mouseY-mPosition.y; 
   }
   
   void mouseDragged() {
     if(mLocked && gLocked == this) {
-      println(mLayer.mSize.x);
-      mPosition.x = constrain(mouseX-xOffset, mLayer.mTranslation.x, (mLayer.mSize.x-mWidth));
+      
+      if(mGrab == 0) mPosition.x = constrain(mouseX-xOffset, mLayer.mTranslation.x, (mLayer.mSize.x-mWidth));
+      else if(mGrab > 0) {
+        if(mGrab == 2) mWidth = ((int)(mouseX-mPosition.x)>=20?(int)(mouseX-mPosition.x):mWidth);
+        else if(mGrab == 1) {
+          //
+          //mWidth = (int)(mouseX-mPosition.x);
+        }
+      }
       //mPosition.y = mouseY-yOffset; 
     }
   }

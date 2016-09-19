@@ -10,8 +10,10 @@ class Layer {
   PVector mOffset = new PVector(0,0);
   PVector mSize = new PVector(width-30, 20);
   PVector mTranslation = new PVector(10,(mID+1)*10);
+  float mColor;
   
   Layer() {
+    this.mColor = random(0,360);
     this.mPosition = new PVector(random(80,width-80), height/2);
     this.mWidth = random(20,200);
     this.mMotor = new Motor("Motor 1", 1, true);
@@ -24,7 +26,7 @@ class Layer {
   
   void add() {
     println("### (LAYER) adding new segment…");
-    segments.add(new Segment(this, true, 500));
+    segments.add(new Segment(this, true, 500, mColor));
     
   }
   
