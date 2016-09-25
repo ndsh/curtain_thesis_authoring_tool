@@ -26,7 +26,7 @@ class Layer {
   }
   
   void add() {
-    println("### (LAYER) adding new segment…");
+    println("### (LAYER) adding new segment...");
     segments.add(new Segment(this, true, 500, mColor));
     
   }
