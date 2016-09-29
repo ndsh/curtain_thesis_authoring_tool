@@ -19,7 +19,7 @@ AccelStepper stepper(1,pinStep, pinDirection); // Defaults to AccelStepper::FULL
 
 void setup()
 {  
-   //Serial.begin(9600);
+   Serial.begin(9600);
    stepper.setEnablePin(enablePin);
    stepper.setMaxSpeed(100*microStepping); // maxSpeed higher than 1000 might be unreliable
    stepper.setSpeed(10*microStepping);
@@ -31,12 +31,11 @@ void setup()
 
 void loop()
 {  
-  Serial.println(counter);
   counter++;
   if(counter >= 40000) {
     counter = 0;
     mode *= -1;
-    Serial.println("bounce");
+    //Serial.println("bounce");
   }
   
   if(mode == 1) { 
