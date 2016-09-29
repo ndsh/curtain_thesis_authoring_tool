@@ -22,9 +22,9 @@ class Timeline {
     println("### (TIMELINE) adding new layer…");
     layers.add(new Layer());
     layers.add(new Layer());
-    layers.add(new Layer());
-    layers.add(new Layer());
-    layers.add(new Layer());
+    // layers.add(new Layer());
+    // layers.add(new Layer());
+    // layers.add(new Layer());
     
   }
   
@@ -39,6 +39,23 @@ class Timeline {
         mPrevMillis = millis();
       }
     }
+    detectLayers();
+  }
+
+  void detectLayers() {
+    for (Layer layer : layers) {
+      //layer.getPosition();
+      //println(layer.getPosition());
+      //println(mBarPosition);
+
+      for (Segment segment : layer.getSegments()) {
+        if (mBarPosition >= segment.getPosition().x && mBarPosition <= (segment.getPosition().x+segment.getWidth())) {
+        println("segment: "+ segment.getID());
+        
+        }
+      }
+      
+    }
   }
   
   void draw() {
@@ -48,7 +65,7 @@ class Timeline {
     
     if(gLocked == null) detect();
     pushStyle();
-    stroke(0,0,70);
+    stroke(0,0,100);
     noFill();
     if(mHover) {
       fill(mTimeBarColor,0,70);

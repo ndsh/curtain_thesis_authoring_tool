@@ -26,7 +26,7 @@ ControlP5 cp5;
 DropdownList d1, d2, d3;
 Textlabel label1, label2;
 
-float mTotalPlayTime = 5.5; // in minutes
+float mTotalPlayTime = 5*60; // in second
 Timeline timeline;
 UserInterface UI = new UserInterface();
 
@@ -40,9 +40,17 @@ boolean mouseDebug = false;
 
 ArrayList<Motor> motors = new ArrayList<Motor>();
 
+// color definitions
+color darkBlue, lightBlue;
+
+color white = color(0, 0, 100);
+
 void setup() {
   size(displayWidth, 400);
   colorMode(HSB, 360, 100, 100);
+  darkBlue = color(207, 100, 64);
+  lightBlue = color(208, 51, 77);
+  noSmooth();
   println("### (AUTHORING_TOOL) welcome!");
   println("### (AUTHORING_TOOL) running the UserInterface with the help of ControlP5:");
   
@@ -50,7 +58,7 @@ void setup() {
   cp5 = new ControlP5(this);
   println();
 
-  background(0);
+  background(darkBlue);
 
   // add some things
   timeline = new Timeline(mTotalPlayTime);
@@ -59,7 +67,7 @@ void setup() {
 }
 
 void draw() {
-  background(0);
+  background(darkBlue);
   for (Motor motor : motors) {
     motor.draw();
   }

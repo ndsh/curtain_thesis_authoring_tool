@@ -10,10 +10,11 @@ class Layer {
   PVector mOffset = new PVector(0,0);
   PVector mSize = new PVector(width-30, 20);
   PVector mTranslation;
-  float mColor;
+  color mColor;
   
   Layer() {
-    this.mColor = random(0,360);
+    //this.mColor = random(0,360);
+    this.mColor = lightBlue;
     this.mPosition = new PVector(random(80,width-80), height/2);
     this.mWidth = random(20,200);
     this.mMotor = new Motor("Motor 1", 1, true);
@@ -34,7 +35,7 @@ class Layer {
   void draw() {
     pushStyle();
     noFill();
-    stroke(0, 0, 70);
+    stroke(0, 0, 100);
     rect(mTranslation.x, mTranslation.y,mSize.x,mSize.y);
     popStyle();
     /*
@@ -57,6 +58,10 @@ class Layer {
     }
     
   }
+
+  ArrayList<Segment> getSegments() {
+    return segments;
+  }
   
   PVector getPosition() {
     return mPosition;
@@ -68,6 +73,10 @@ class Layer {
   
   float getWidth() {
     return mWidth;
+  }
+
+  int getID() {
+    return mID;
   }
  
   
