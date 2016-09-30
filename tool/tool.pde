@@ -21,6 +21,7 @@
  */
 
 import controlP5.*;
+import java.util.Collections;
 
 ControlP5 cp5;
 DropdownList d1, d2, d3;
@@ -67,6 +68,8 @@ void setup() {
   timeline = new Timeline(mTotalPlayTime);
   motors.add(new Motor("Motor S", 1, true));
   timeline.add();
+
+  timeline.getExport();
 }
 
 void draw() {

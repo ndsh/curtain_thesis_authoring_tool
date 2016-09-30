@@ -60,6 +60,15 @@ class Layer {
   ArrayList<Segment> getSegments() {
     return segments;
   }
+
+  ArrayList<PVector> getPVectors() {
+    ArrayList<PVector> dots = new ArrayList<PVector>();
+    for (Segment segment : segments) {
+      PVector v = segment.getPosition();
+      dots.add(v);
+    }
+    return dots;
+  }
   
   PVector getPosition() {
     return mPosition;

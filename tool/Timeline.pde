@@ -127,5 +127,21 @@ class Timeline {
   int getCount() {
     return layers.size();
   }
+
+  void getExport() {
+    for (Layer layer : layers) {
+      if(layer.getID() == 0) {
+        // for (Segment segment : layer.getSegments()) {
+
+          // println(segment.getPosition());
+        // }
+        ArrayList<PVector> positions = layer.getPVectors();
+        Collections.sort(positions, new DistanceComparator(new PVector(0,0)));
+        println(positions);
+        
+      }
+      
+    }
+  }
   
  }
