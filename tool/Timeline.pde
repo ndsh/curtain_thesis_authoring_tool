@@ -12,7 +12,8 @@ class Timeline {
   float xOffset = 0;
   int mTimeBarWidth = 5;
   int mTimeBarColor = 360;
-  
+  int mGrabArea = 20;
+
   Timeline(float _mTotalPlayTime) {
     this.mTotalPlayTime = _mTotalPlayTime;
     println("### (TIMELINE) created");
@@ -71,7 +72,8 @@ class Timeline {
       fill(mTimeBarColor,0,70);
       if(mLocked) fill(mTimeBarColor,0,100);
     } else fill(mTimeBarColor,0,50);
-    rect(mBarPosition, mTimeBarWidth, mTimeBarWidth, height-(mTimeBarWidth*2));
+    // rect(mBarPosition, mTimeBarWidth+headexr.getHeight(), mTimeBarWidth, height-(mTimeBarWidth*2));
+    line(mBarPosition,mTimeBarWidth+header.getHeight(),mBarPosition,height-(mTimeBarWidth*2));
     popStyle();
     //line(mBarPosition, 10, mBarPosition, height-10);
     
@@ -79,8 +81,8 @@ class Timeline {
   }
   
   void detect() {
-    if (mouseX >= mBarPosition && mouseX <= mBarPosition+10 && 
-      mouseY >= mTimeBarWidth && mouseY <= height-mTimeBarWidth) {
+    if (mouseX >= mBarPosition-(mGrabArea/2) && mouseX <= mBarPosition+(mGrabArea/2) && 
+      mouseY >= mTimeBarWidth+header.getHeight() && mouseY <= height-(mTimeBarWidth+header.getHeight())) {
         mHover = true;
     } else {
       mHover = false;
@@ -120,6 +122,10 @@ class Timeline {
     for (Layer layer : layers) {
       layer.mouseReleased();
     }
+  }
+
+  int getCount() {
+    return layers.size();
   }
   
  }

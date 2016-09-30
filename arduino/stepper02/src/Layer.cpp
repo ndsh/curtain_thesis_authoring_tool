@@ -8,6 +8,16 @@ Layer::Layer() {
 void Layer::setup(int tID, int tSegments) {
 	// topkeksetup()
 	mID = tID;
+	if(mID == 0) {
+		steppers[0]->setEnablePin(13);
+	   	steppers[0]->setMaxSpeed(500*32); // maxSpeed higher than 1000 might be unreliable
+	   	// steppers[0]->setSpeed(200*32);
+	   
+	   	steppers[0]->setPinsInverted(false, false, true); 
+
+		steppers[0]->enableOutputs();
+	}
+	
 	mSegments = tSegments;
 	mCurrentSegment = 0;
 	mCommands = malloc(mSegments * sizeof(int*));
@@ -51,7 +61,13 @@ void Layer::setup(int tID, int tSegments) {
 }
 
 void Layer::update() {
+	int microStepping = 32;
+	int newSpeed = 200;
+	
+
 	if(mID == 0) {
+		steppers[0]->setSpeed((mCurrentSteps*microStepping));
+    	steppers[0]->runSpeed();
 	// Serial.print("(LAYER) \t current segment in ");
 	// Serial.print(mID);
 	// Serial.print(" is ");
@@ -64,8 +80,14 @@ void Layer::update() {
 	if(mCurrentRuntime <= 0 && mCurrentSegment < mSegments) {
 		mCurrentSegment++;
 		mCurrentRuntime = (mCommands[mCurrentSegment][0])*1000;
+		mCurrentSteps = mCommands[mCurrentSegment][1];
 		Serial.print("changing segment in layer ");
-		Serial.println(mID);
+		Serial.print(mID);
+		Serial.print(" to ");
+	  	Serial.print(mCurrentSegment);
+	  	Serial.print(" - new speed: ");
+	  	Serial.println(mCurrentSteps);
+		if(mID == 0) steppers[0]->setSpeed((mCurrentSteps*microStepping));
 	}
 
 }

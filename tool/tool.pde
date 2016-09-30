@@ -17,7 +17,7 @@
  Segment Class: holds information about time, motor number, position in timeline, etc.pp
  Motion Class: is inside of a segment and just describes that motor's velocity and direction
  Motor Class: holds meta information about if it's a up/down pulley or a symmetrical left/right pulley; name
- UserInterface Class: show/hide the UI. simple stuff.
+ UserInterface Class: show/hide the ui. simple stuff.
  */
 
 import controlP5.*;
@@ -28,7 +28,7 @@ Textlabel label1, label2;
 
 float mTotalPlayTime = 5*60; // in second
 Timeline timeline;
-UserInterface UI = new UserInterface();
+UserInterface ui;
 
 int mSegmentCounter = 0;
 int mLayerCounter = 0;
@@ -40,25 +40,28 @@ boolean mouseDebug = false;
 
 ArrayList<Motor> motors = new ArrayList<Motor>();
 
-// color definitions
-color darkBlue, lightBlue;
-
-color white = color(0, 0, 100);
+Header header;
+Farbe farbe;
 
 void setup() {
   size(displayWidth, 400);
   colorMode(HSB, 360, 100, 100);
-  darkBlue = color(207, 100, 64);
-  lightBlue = color(208, 51, 77);
+  
   noSmooth();
   println("### (AUTHORING_TOOL) welcome!");
   println("### (AUTHORING_TOOL) running the UserInterface with the help of ControlP5:");
   
-
-  cp5 = new ControlP5(this);
+  cp5 = new ControlP5(this);  
   println();
 
-  background(darkBlue);
+  header = new Header();
+  farbe = new Farbe();
+  ui = new UserInterface();
+
+  
+  
+
+  background(farbe.normal());
 
   // add some things
   timeline = new Timeline(mTotalPlayTime);
@@ -67,7 +70,9 @@ void setup() {
 }
 
 void draw() {
-  background(darkBlue);
+  background(farbe.normal());
+  header.draw();
+  
   for (Motor motor : motors) {
     motor.draw();
   }

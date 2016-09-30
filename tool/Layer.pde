@@ -8,19 +8,16 @@ class Layer {
   boolean mHover = false;
   boolean mLocked = false;
   PVector mOffset = new PVector(0,0);
-  PVector mSize = new PVector(width-30, 20);
+  PVector mSize = new PVector(width-30, 59);
   PVector mTranslation;
-  color mColor;
   
   Layer() {
-    //this.mColor = random(0,360);
-    this.mColor = lightBlue;
     this.mPosition = new PVector(random(80,width-80), height/2);
     this.mWidth = random(20,200);
     this.mMotor = new Motor("Motor 1", 1, true);
     mID = mLayerCounter;
     mLayerCounter++;
-    mTranslation = new PVector(10,(mID+1)*30);
+    mTranslation = new PVector(10,header.getHeight()+((mID+1)*59));
     println("### (LAYER) created");
     float r = random(0,5);
     for(float i = 0; i<r; i+=1.) add();
@@ -28,15 +25,16 @@ class Layer {
   
   void add() {
     println("### (LAYER) adding new segment...");
-    segments.add(new Segment(this, true, 500, mColor));
+    segments.add(new Segment(this, true, 500));
     
   }
   
   void draw() {
     pushStyle();
     noFill();
+    strokeWeight(2);
     stroke(0, 0, 100);
-    rect(mTranslation.x, mTranslation.y,mSize.x,mSize.y);
+    rect(mTranslation.x, mTranslation.y, mSize.x, mSize.y);
     popStyle();
     /*
     pushStyle();

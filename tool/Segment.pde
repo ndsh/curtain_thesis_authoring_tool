@@ -6,25 +6,25 @@ class Segment {
   float xOffset = 0.0;
   float yOffset = 0.0;
   PVector mPosition;
+  PVector mSize;
+  float mGrabArea;
   int mID = 0;
-  int mWidth = (int)random(50,200);
   int mGrab = -1;
   Layer mLayer;
-  color mColor;
   Knob mKnobDistance;
   boolean mContext = false;
   float mTargetDirection = 0;
   CallbackListener cb;
+  int mMargin = 3;
   
   
-  Segment(Layer _mLayer, boolean _mDirection, int _mSpeed, color _mColor) {
-    
+  Segment(Layer _mLayer, boolean _mDirection, int _mSpeed) {
+    this.mSize = new PVector((int)random(50,200), 52);
     this.mLayer = _mLayer;
-    this.mColor = _mColor;
-    this.mPosition = new PVector(random(mLayer.mTranslation.x, mLayer.mSize.x), mLayer.mTranslation.y);
+    this.mPosition = new PVector(random(mLayer.mTranslation.x, mLayer.mSize.x), mLayer.mTranslation.y+mMargin);
     this.mDirection = _mDirection;
     this.mSpeed = _mSpeed;
-    //mPosition = new PVector(0,0);
+    this.mGrabArea = 32;
     println("### (SEGMENT) created");
     mID = mSegmentCounter;
     mSegmentCounter++;
@@ -32,20 +32,24 @@ class Segment {
     cb = new CallbackListener() {
         public void controlEvent(CallbackEvent theEvent) {
            if (theEvent.getController().getName().equals("knob"+mID)) {
-            
+            mTargetDirection = theEvent.getController().getValue();
           }
         }
     };
 
     mKnobDistance = cp5.addKnob("knob"+mID)
-               .setRange(-2000,2000)
-               .setCaptionLabel("distance")
-               .setValue(0)
-               .setPosition(mPosition.x,mPosition.y)
-               .setRadius(30)
-               .setDragDirection(Knob.VERTICAL)
-               .addCallback(cb)
-               ;
+       .setRange(-2000,2000)
+       .setCaptionLabel("distance")
+       .setValue(0)
+       .setPosition(mPosition.x,mPosition.y)
+       .setRadius(26)
+       .setNumberOfTickMarks(200)
+       .setDragDirection(Knob.VERTICAL)
+       .addCallback(cb)
+       .setColorForeground(farbe.light())
+       .setColorBackground(farbe.normal())
+       .setColorActive(farbe.white())
+       ;
 
     
 
@@ -58,17 +62,33 @@ class Segment {
     } else mKnobDistance.setVisible(false);
     if(gLocked == null) detect();
     pushStyle();
-    //rectMode(CORNER);
-    stroke(0, 0, 100);
+    stroke(farbe.light());
     if(mHover) {
-      fill(mColor);
-      if(mLocked && mGrab == 0) fill(mColor,70,100);
-    } else fill(mColor,70,50); 
+      stroke(farbe.white());
+      fill(farbe.light());
+      if(mLocked && mGrab == 0) fill(farbe.white());
+    } else {
+      if(mContext) fill(farbe.white()); 
+      else fill(farbe.light()); 
+    }
     
     
-    rect(mPosition.x, mPosition.y, mWidth, 20);
-    fill(125);
-    rect(mPosition.x+mWidth-10, mPosition.y, 10, 20);
+    rect(mPosition.x, mPosition.y, mSize.x, mSize.y);
+
+    // grab area
+    noStroke();
+    // fill(360,100,100);
+    rect(mPosition.x+mSize.x-mGrabArea+1, mPosition.y+1, mGrabArea-1, mSize.y-1);
+    stroke(farbe.normal());
+    // stroke(90,100,100);
+    line(mPosition.x+mSize.x-mGrabArea, mPosition.y+1, mPosition.x+mSize.x-mGrabArea, mPosition.y+mSize.y-1);
+    pushMatrix();
+    translate(mPosition.x+mSize.x-mGrabArea+(mGrabArea/4), mPosition.y+(mSize.y/2));
+    line(0,-3,16,-3);
+    line(0,0,16,0);
+    line(0,3,16,3);
+    popMatrix();
+    noStroke();
     //text(mWidth, mPosition.x, mPosition.y+5);
     //text("#"+mID, mPosition.x, mPosition.y+5);
     //text(mPosition.x + "|" + mPosition.y, mPosition.x, mPosition.y+40);
@@ -85,7 +105,7 @@ class Segment {
   }
   
   float getWidth() {
-    return mWidth;
+    return mSize.x;
   }
 
   int getID() {
@@ -97,18 +117,18 @@ class Segment {
     //mWidth
     //length: 10-width-30
 
-    return map(mWidth, 10, width-30, 0, mTotalPlayTime);
+    return map(mSize.x, mGrabArea, width-30, 0, mTotalPlayTime);
   }
   
   void detect() {
-    if (mouseX >= mPosition.x && mouseX <= mPosition.x+mWidth && 
-      mouseY >= mPosition.y && mouseY <= mPosition.y+20) {
+    if (mouseX >= mPosition.x && mouseX <= mPosition.x+mSize.x && 
+      mouseY >= mPosition.y && mouseY <= mPosition.y+mSize.y) {
         mHover = true;
         // left corner
-        if (mouseX >= mPosition.x && mouseX <= mPosition.x+10 && 
-        mouseY >= mPosition.y && mouseY <= mPosition.y+20) mGrab = 1;
-        else if (mouseX >= (mPosition.x+mWidth)-10 && mouseX <= mPosition.x+mWidth && 
-        mouseY >= mPosition.y && mouseY <= mPosition.y+20) mGrab = 2;
+        if (mouseX >= mPosition.x && mouseX <= mPosition.x+mGrabArea && 
+        mouseY >= mPosition.y && mouseY <= mPosition.y+mSize.y) mGrab = 1;
+        else if (mouseX >= (mPosition.x+mSize.x)-mGrabArea && mouseX <= mPosition.x+mSize.x && 
+        mouseY >= mPosition.y && mouseY <= mPosition.y+mSize.y) mGrab = 2;
         else mGrab = 0;
     } else {
       mHover = false;
@@ -120,7 +140,7 @@ class Segment {
     if(mHover && gLocked == null && !timeBarLock) { 
       mLocked = true;
       gLocked = this;
-      mContext = !mContext;
+      if(mouseButton == RIGHT) mContext = !mContext;
       println("i am layer #"+ mID +" and my position is: "+ mPosition);
       println("my platime is: "+ getTime());
     } else {
@@ -133,9 +153,9 @@ class Segment {
   
   void mouseDragged() {
     if(mLocked && gLocked == this) {
-      if(mGrab == 0) mPosition.x = constrain(mouseX-xOffset, mLayer.mTranslation.x, (mLayer.mSize.x-mWidth));
+      if(mGrab == 0) mPosition.x = constrain(mouseX-xOffset, mLayer.mTranslation.x, (mLayer.mSize.x-mSize.x));
       else if(mGrab > 0) {
-        if(mGrab == 2) mWidth = ((int)(mouseX-mPosition.x)>=20?(int)(mouseX-mPosition.x):mWidth);
+        if(mGrab == 2) mSize.x = ((int)(mouseX-mPosition.x)>=mSize.y?(int)(mouseX-mPosition.x):mSize.x);
         else if(mGrab == 1) {
           //
           //mWidth = (int)(mouseX-mPosition.x);

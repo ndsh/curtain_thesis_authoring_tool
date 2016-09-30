@@ -1,11 +1,13 @@
 #ifndef Layer_h
 #define Layer_h
 #include <Arduino.h>
+#include <AccelStepper.h>
 
-extern int gTotalLayers;;
+extern int gTotalLayers;
 extern int* gSegmentAmounts;
 extern int **gCommands;
 extern int gTotalCountSegments;
+extern AccelStepper *steppers[];
 
 class Layer
 {
