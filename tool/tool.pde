@@ -28,10 +28,13 @@ DropdownList d1, d2, d3;
 Textlabel label1, label2;
 
 float mTotalPlayTime = 5*60; // in second
+float mStepResolution = 0.014; // 10 seconds = 14 cm
 Timeline timeline;
 UserInterface ui;
 
-int mSegmentCounter = 0;
+PFont mFont;
+
+// int mSegmentCounter = 0;
 int mLayerCounter = 0;
 
 Segment gLocked = null;
@@ -44,8 +47,20 @@ ArrayList<Motor> motors = new ArrayList<Motor>();
 Header header;
 Farbe farbe;
 
+int maxWidth;
+int leftMargin;
+int rightMargin;
+
+String mPath = "/Volumes/Macintosh HD/Users/julianhespenheide/Programming/Gitshit/Non-work/irena_thesis/curtain_thesis_authoring_tool/tool/export/";
+
 void setup() {
   size(displayWidth, 400);
+  mFont = loadFont("Inconsolata-Regular-13-smooth.vlw");
+  textFont(mFont, 13);
+
+  leftMargin = 30; // the margin to the left side
+  rightMargin = leftMargin*2;
+  maxWidth = width-rightMargin;
   colorMode(HSB, 360, 100, 100);
   
   noSmooth();
@@ -55,9 +70,11 @@ void setup() {
   cp5 = new ControlP5(this);  
   println();
 
-  header = new Header();
   farbe = new Farbe();
   ui = new UserInterface();
+  header = new Header();
+  
+  
 
   
   
@@ -110,3 +127,12 @@ void keyPressed() {
       timeline.toggle();
   }
 }
+
+void folderSelected(File selection) {
+    if (selection == null) {
+      println("Window was closed or the user hit cancel.");
+    } else {
+      mPath = selection.getAbsolutePath();
+      println("User selected " + selection.getAbsolutePath());
+    }
+  }

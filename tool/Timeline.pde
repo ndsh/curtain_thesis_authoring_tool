@@ -4,7 +4,7 @@ class Timeline {
   
   ArrayList<Layer> layers = new ArrayList<Layer>();
   boolean mPlay = false;
-  float mBarPosition = 10;
+  float mBarPosition = leftMargin;
   float mTotalPlayTime;
   int mPrevMillis = 0;
   boolean mHover = false;
@@ -124,22 +124,24 @@ class Timeline {
     }
   }
 
-  int getCount() {
+  int countLayers() {
     return layers.size();
   }
 
+  ArrayList<Layer> getLayers() {
+    return layers;
+  }
+
+
   void getExport() {
     for (Layer layer : layers) {
-      if(layer.getID() == 0) {
-        // for (Segment segment : layer.getSegments()) {
 
-          // println(segment.getPosition());
-        // }
-        ArrayList<PVector> positions = layer.getPVectors();
-        Collections.sort(positions, new DistanceComparator(new PVector(0,0)));
-        println(positions);
-        
-      }
+      // REMOVE ME!!!
+      // if(layer.getID() == 1) {
+        // println(layer.sortSegments());
+        // println(layer.getNullSegments());
+        println(layer.sortSegments(layer.mergeLists(layer.getSegmentsWithID(), layer.getNullSegments())));
+      // }
       
     }
   }

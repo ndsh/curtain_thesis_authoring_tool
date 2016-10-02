@@ -16,6 +16,7 @@ class Segment {
   float mTargetDirection = 0;
   CallbackListener cb;
   int mMargin = 3;
+  String mLabel;
   
   
   Segment(Layer _mLayer, boolean _mDirection, int _mSpeed) {
@@ -26,36 +27,36 @@ class Segment {
     this.mSpeed = _mSpeed;
     this.mGrabArea = 32;
     println("### (SEGMENT) created");
-    mID = mSegmentCounter;
-    mSegmentCounter++;
+    mID = mLayer.mSegmentCounter;
+    mLayer.mSegmentCounter++;
+    mLabel = "WHATEVER";
 
     cb = new CallbackListener() {
         public void controlEvent(CallbackEvent theEvent) {
-           if (theEvent.getController().getName().equals("knob"+mID)) {
+          if (theEvent.getController().getName().equals("knob"+mLayer.getID()+"_"+mID)) {
             mTargetDirection = theEvent.getController().getValue();
           }
         }
     };
 
-    mKnobDistance = cp5.addKnob("knob"+mID)
-       .setRange(-2000,2000)
-       .setCaptionLabel("distance")
-       .setValue(0)
-       .setPosition(mPosition.x,mPosition.y)
-       .setRadius(26)
-       .setNumberOfTickMarks(200)
-       .setDragDirection(Knob.VERTICAL)
-       .addCallback(cb)
-       .setColorForeground(farbe.light())
-       .setColorBackground(farbe.normal())
-       .setColorActive(farbe.white())
-       ;
-
-    
+    mKnobDistance = cp5.addKnob("knob"+mLayer.getID()+"_"+mID)
+    .setRange(-2000,2000)
+    .setCaptionLabel("distance")
+    .setValue(0)
+    .setPosition(mPosition.x,mPosition.y)
+    .setRadius(26)
+    .setNumberOfTickMarks(200)
+    .setDragDirection(Knob.VERTICAL)
+    .addCallback(cb)
+    .setColorForeground(farbe.light())
+    .setColorBackground(farbe.normal())
+    .setColorActive(farbe.white())
+    ;    
 
   }
   
   void draw() {
+
     if(mContext) {
       mKnobDistance.setVisible(true);
       mKnobDistance.setPosition(mPosition.x,mPosition.y);
@@ -92,8 +93,21 @@ class Segment {
     //text(mWidth, mPosition.x, mPosition.y+5);
     //text("#"+mID, mPosition.x, mPosition.y+5);
     //text(mPosition.x + "|" + mPosition.y, mPosition.x, mPosition.y+40);
-    popStyle();
+    pushMatrix();
+    pushStyle();
+    translate(mPosition.x+10, mPosition.y+(mSize.y/2)+5);
+
+    // needs refinement
+    stroke(farbe.white());
+    line(0,0,10,(map(abs(getSteps()), 0, 150000, 0, 200))*-1);
+    
     //mHover = false;
+    
+    fill(farbe.normal());
+    mLabel = readableTime(getTime()) + " | "+ (int)mTargetDirection +"cm";
+    text(mLabel, 0,0);
+    popStyle();
+    popMatrix();
   }
 
   PVector getPosition() {
@@ -119,6 +133,10 @@ class Segment {
 
     return map(mSize.x, mGrabArea, width-30, 0, mTotalPlayTime);
   }
+
+  String readableTime(float t) {
+    return t<=60?(int)t+"s":(int)t/60+":"+(int)t%60+"min";
+  }
   
   void detect() {
     if (mouseX >= mPosition.x && mouseX <= mPosition.x+mSize.x && 
@@ -141,7 +159,7 @@ class Segment {
       mLocked = true;
       gLocked = this;
       if(mouseButton == RIGHT) mContext = !mContext;
-      println("i am layer #"+ mID +" and my position is: "+ mPosition);
+      println("i am segment #"+ mID +" and my position is: "+ mPosition);
       println("my platime is: "+ getTime());
     } else {
       mLocked = false;
@@ -170,10 +188,9 @@ class Segment {
     if(gLocked == this) gLocked = null;
   }
 
-  void yo() {
-    println("yo");
+  int getSteps() {
+    return (int)(mTargetDirection/(mStepResolution*getTime()));
   }
-
   
 
 
