@@ -1,66 +1,73 @@
 class Segment {
-  boolean mDirection;
-  int mSpeed;
-  boolean mHover = false;
-  boolean mLocked = false;
-  float xOffset = 0.0;
-  float yOffset = 0.0;
-  PVector mPosition;
-  PVector mSize;
-  float mGrabArea;
+  
+  //position
   int mID = 0;
-  int mGrab = -1;
+  float mGrabArea;
+  
   Layer mLayer;
-  Knob mKnobDistance;
-  boolean mContext = false;
-  float mTargetDirection = 0;
-  CallbackListener cb;
+  
   int mMargin = 3;
   String mLabel;
+  String mUniqueID;
+
+  //values we need to save into a file
+  float mTargetDirection = 0;
+  PVector mPosition;
+  PVector mSize;
+
+  //volatiles
+  boolean mContext = false;
+  boolean mHover = false;
+  boolean mLocked = false;
+  int mGrab = -1; // mGrab = 0
+  float xOffset = 0.0;
+  float yOffset = 0.0;
+
+
+  //cp5
+  CallbackListener cb;
+  Knob mKnobDistance;
+
+  // display where the current cm is right now at any given point of time
   
-  
-  Segment(Layer _mLayer, boolean _mDirection, int _mSpeed) {
-    this.mSize = new PVector((int)random(50,200), 52);
-    this.mLayer = _mLayer;
-    this.mPosition = new PVector(random(mLayer.mTranslation.x, mLayer.mSize.x), mLayer.mTranslation.y+mMargin);
-    this.mDirection = _mDirection;
-    this.mSpeed = _mSpeed;
-    this.mGrabArea = 32;
+  Segment(Layer _mLayer)  {
+    mLayer = _mLayer;
+    mPosition = new PVector(random(mLayer.mTranslation.x, mLayer.mSize.x), mLayer.mTranslation.y+mMargin);
+    mSize = new PVector((int)random(50,200), mLayer.mSize.y-7);
+    mGrabArea = 32;
+    
     println("### (SEGMENT) created");
     mID = mLayer.mSegmentCounter;
+    mUniqueID = mLayer.getID()+"_"+mID;
     mLayer.mSegmentCounter++;
-    mLabel = "WHATEVER";
+    mLabel = "";
 
     cb = new CallbackListener() {
         public void controlEvent(CallbackEvent theEvent) {
-          if (theEvent.getController().getName().equals("knob"+mLayer.getID()+"_"+mID)) {
-            mTargetDirection = theEvent.getController().getValue();
+          if (theEvent.getController().getName().equals("sliderTime"+mUniqueID)) {
+            mTargetDirection = (int)theEvent.getController().getValue();
           }
         }
     };
-
-    mKnobDistance = cp5.addKnob("knob"+mLayer.getID()+"_"+mID)
-    .setRange(-2000,2000)
-    .setCaptionLabel("distance")
-    .setValue(0)
+    cp5.addSlider("sliderTime"+mUniqueID)
+    .setCaptionLabel("cm")
     .setPosition(mPosition.x,mPosition.y)
-    .setRadius(26)
-    .setNumberOfTickMarks(200)
-    .setDragDirection(Knob.VERTICAL)
-    .addCallback(cb)
+    .setSize(120,16)
+    .setRange(-2000,2000)
+    .setNumberOfTickMarks(800)
+    .setValue(0)
     .setColorForeground(farbe.light())
-    .setColorBackground(farbe.normal())
-    .setColorActive(farbe.white())
-    ;    
+    .setColorBackground(farbe.white())
+    .setColorActive(farbe.light())
+    .setColorCaptionLabel(farbe.normal())
+    .setColorValueLabel(farbe.normal())
+    .showTickMarks(false)
+    .addCallback(cb)
+    ;
 
   }
   
   void draw() {
-
-    if(mContext) {
-      mKnobDistance.setVisible(true);
-      mKnobDistance.setPosition(mPosition.x,mPosition.y);
-    } else mKnobDistance.setVisible(false);
     if(gLocked == null) detect();
     pushStyle();
     stroke(farbe.light());
@@ -73,11 +80,11 @@ class Segment {
       else fill(farbe.light()); 
     }
     
-    
+    noStroke();
     rect(mPosition.x, mPosition.y, mSize.x, mSize.y);
 
     // grab area
-    noStroke();
+    
     // fill(360,100,100);
     rect(mPosition.x+mSize.x-mGrabArea+1, mPosition.y+1, mGrabArea-1, mSize.y-1);
     stroke(farbe.normal());
@@ -98,16 +105,51 @@ class Segment {
     translate(mPosition.x+10, mPosition.y+(mSize.y/2)+5);
 
     // needs refinement
-    stroke(farbe.white());
-    line(0,0,10,(map(abs(getSteps()), 0, 150000, 0, 200))*-1);
+    // stroke(farbe.white());
+    //line(0,0,10,(map(abs(getSteps()), 0, 150000, 0, 200))*-1);
+    // String tSpeed = "";
+    // if(getSteps() == 0) tSpeed = "stationary";
+    // else if(getSteps() > 0 && getSteps() <= 50) tSpeed = "slow";
+    // else if(getSteps() > 50 && getSteps() <= 150) tSpeed = "medium";
+    // else if(getSteps() > 150) tSpeed = "fast";
+    // fill(farbe.normal());
+    // text(tSpeed, 0,10);
     
     //mHover = false;
     
     fill(farbe.normal());
-    mLabel = readableTime(getTime()) + " | "+ (int)mTargetDirection +"cm";
+    if(mSize.x > 110) mLabel = readableTime(getTime()) + " | "+ (int)mTargetDirection +"cm";
+    else if(mSize.x <= 110 && mSize.x > 60) mLabel = readableTime(getTime());
+    else mLabel = "";
     text(mLabel, 0,0);
+    
     popStyle();
     popMatrix();
+
+    contextMenu(mContext);
+  }
+
+  void contextMenu(boolean b) {
+    if(b) {
+      cp5.getController("sliderTime"+mUniqueID).setVisible(true);
+      cp5.getController("sliderTime"+mUniqueID).setPosition(mPosition.x+3,mPosition.y+mSize.y+4);
+      pushMatrix();
+      translate(mPosition.x, mPosition.y+mSize.y);
+      pushStyle();
+      fill(farbe.white());
+      rect(0,0, constrain(mSize.x, 100, mSize.x), 23);
+      stroke(farbe.normal());
+      line(-1,-1,constrain(mSize.x, 100, mSize.x), -1);
+      popStyle();
+      popMatrix();
+    } else {
+      cp5.getController("sliderTime"+mUniqueID).setVisible(false);
+    }
+  }
+
+  void updateTranslation() {
+    mPosition.y = mLayer.mTranslation.y+mMargin;
+    // cp5.getController("sliderTime"+mUniqueID).setPosition(mPosition.x+3,mPosition.y+mSize.y+4);
   }
 
   PVector getPosition() {
@@ -143,10 +185,11 @@ class Segment {
       mouseY >= mPosition.y && mouseY <= mPosition.y+mSize.y) {
         mHover = true;
         // left corner
-        if (mouseX >= mPosition.x && mouseX <= mPosition.x+mGrabArea && 
-        mouseY >= mPosition.y && mouseY <= mPosition.y+mSize.y) mGrab = 1;
-        else if (mouseX >= (mPosition.x+mSize.x)-mGrabArea && mouseX <= mPosition.x+mSize.x && 
-        mouseY >= mPosition.y && mouseY <= mPosition.y+mSize.y) mGrab = 2;
+        // if (mouseX >= mPosition.x && mouseX <= mPosition.x+mGrabArea && 
+        // mouseY >= mPosition.y && mouseY <= mPosition.y+mSize.y) mGrab = 1; // grab area
+        // else 
+          if (mouseX >= (mPosition.x+mSize.x)-mGrabArea && mouseX <= mPosition.x+mSize.x && 
+        mouseY >= mPosition.y && mouseY <= mPosition.y+mSize.y) mGrab = 2; // normal area
         else mGrab = 0;
     } else {
       mHover = false;
@@ -159,8 +202,9 @@ class Segment {
       mLocked = true;
       gLocked = this;
       if(mouseButton == RIGHT) mContext = !mContext;
-      println("i am segment #"+ mID +" and my position is: "+ mPosition);
-      println("my platime is: "+ getTime());
+      print("### (SEGMENT) ");
+      print("clicked on segment #"+ mID +" with position: "+ mPosition);
+      println(" - playtime: "+ getTime());
     } else {
       mLocked = false;
     }

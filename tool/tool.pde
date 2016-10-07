@@ -48,17 +48,19 @@ Header header;
 Farbe farbe;
 
 int maxWidth;
+int previousWidth;
 int leftMargin;
 int rightMargin;
 
-String mPath = "/Volumes/Macintosh HD/Users/julianhespenheide/Programming/Gitshit/Non-work/irena_thesis/curtain_thesis_authoring_tool/tool/export/";
+String mArduinoPath = "/Volumes/Macintosh HD/Users/julianhespenheide/Programming/Gitshit/Non-work/irena_thesis/curtain_thesis_authoring_tool/tool/export/";
 
 void setup() {
   size(displayWidth, 400);
+  surface.setResizable(true);
   mFont = loadFont("Inconsolata-Regular-13-smooth.vlw");
   textFont(mFont, 13);
 
-  leftMargin = 30; // the margin to the left side
+  leftMargin = 10; // the margin to the left side
   rightMargin = leftMargin*2;
   maxWidth = width-rightMargin;
   colorMode(HSB, 360, 100, 100);
@@ -68,13 +70,14 @@ void setup() {
   println("### (AUTHORING_TOOL) running the UserInterface with the help of ControlP5:");
   
   cp5 = new ControlP5(this);  
+  cp5.getProperties().setFormat(ControlP5.SERIALIZED);
   println();
 
   farbe = new Farbe();
   ui = new UserInterface();
   header = new Header();
   
-  
+  previousWidth = width;
 
   
   
@@ -90,6 +93,13 @@ void setup() {
 }
 
 void draw() {
+  if(width != previousWidth) {
+    println("e");
+    maxWidth = width-rightMargin;
+    timeline.updateTranslation();
+    header.updateTranslation();
+    previousWidth = width;
+  }
   background(farbe.normal());
   header.draw();
   
@@ -106,7 +116,7 @@ void draw() {
   line(mouseX+33, mouseY+33, mouseX+45, mouseY+33);
   text(mouseX + "|" + mouseY, mouseX+50, mouseY+38);
   popStyle();
-  }
+  }  
   
 }
 
@@ -126,13 +136,20 @@ void keyPressed() {
   if (key == ' ') {
       timeline.toggle();
   }
+  if (key == CODED) {
+    if (keyCode == UP) {
+      header.scrollUp();
+    } else if (keyCode == DOWN) {
+      header.scrollDown();
+    }
+  }
 }
 
 void folderSelected(File selection) {
     if (selection == null) {
       println("Window was closed or the user hit cancel.");
     } else {
-      mPath = selection.getAbsolutePath();
+      mArduinoPath = selection.getAbsolutePath();
       println("User selected " + selection.getAbsolutePath());
     }
   }

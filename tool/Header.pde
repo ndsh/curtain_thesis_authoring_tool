@@ -4,10 +4,12 @@ class Header {
 	String mLabel;
 	int sliderTime;
 	Textlabel mTitle;
+	PVector mOrigin;
 	
 
 	Header() {
-		mDimensions =  new PVector(width, 88);
+		mOrigin = new PVector(0,0);
+		mDimensions = new PVector(width, 88);
 		mLabel = "AUTHORING TOOL";
 
 	    cb = new CallbackListener() {
@@ -18,28 +20,52 @@ class Header {
 					mTotalPlayTime = theEvent.getController().getValue()*60;
 				} else if (theEvent.getController().getName().equals("buttonSaveTo")) {
 					if(theEvent.getController().isMousePressed()) selectFolder("Select a folder to process:", "folderSelected");
-				}
+				} else if (theEvent.getController().getName().equals("loadSettings")) {
+	            	if(theEvent.getController().isMousePressed()) loadSettings();
+	            } else if (theEvent.getController().getName().equals("saveSettings")) {
+	            	if(theEvent.getController().isMousePressed()) saveSettings();
+	            }
 			}
 		};
 
 		cp5.addButton("buttonExport")
 		.setValue(0)
-		.setPosition(width-(100+leftMargin),10)
+		.setPosition(width-(100+leftMargin),mOrigin.y+10)
 		.setSize(100,20)
 		.setCaptionLabel("Export")
 		.addCallback(cb)
 		;
 		cp5.addButton("buttonSaveTo")
 		.setValue(0)
-		.setPosition(width-(100+leftMargin),32)
+		.setPosition(width-(100+leftMargin),mOrigin.y+32)
 		.setSize(100,20)
-		.setCaptionLabel("Save to...")
+		.setCaptionLabel("Save Export to...")
 		.addCallback(cb)
 		;
-
+		cp5.addButton("loadSettings")
+		.setValue(0)
+		.setPosition(width-(202+leftMargin),mOrigin.y+10)
+		.setSize(100,20)
+		.setCaptionLabel("Load Settings")
+		.addCallback(cb)
+		;
+		cp5.addButton("saveSettings")
+		.setValue(0)
+		.setPosition(width-(202+leftMargin),mOrigin.y+32)
+		.setSize(100,20)
+		.setCaptionLabel("Save Settings")
+		.addCallback(cb)
+		;
+		cp5.addButton("addNewLayer")
+		.setPosition(width-(304+leftMargin),mOrigin.y+10)
+		.setValue(0)
+		.setSize(100,20)
+		.setCaptionLabel("Add Layer...")
+		.addCallback(cb)
+		;
 		cp5.addSlider("sliderTime")
 		.setCaptionLabel("Minutes")
-		.setPosition(leftMargin+200,(mDimensions.y/2)-11)
+		.setPosition(leftMargin+200,mOrigin.y+(mDimensions.y/2)-11)
 		.setSize(90,16)
 		.setRange(1,10)
 		.setNumberOfTickMarks(10)
@@ -51,19 +77,23 @@ class Header {
        	.setColorValueLabel(farbe.white())
        	.addCallback(cb)
 		;
-		
 		cp5.getController("sliderTime")
 		.getCaptionLabel()
 		.align(ControlP5.RIGHT, ControlP5.BOTTOM_OUTSIDE)
 		.setPaddingX(0);
-
-		mTitle = cp5.addTextlabel(mLabel)
+		cp5.addTextlabel(mLabel)
 		.setText(mLabel)
-		.setPosition(leftMargin, (mDimensions.y/2))
+		.setPosition(leftMargin, mOrigin.y+(mDimensions.y/2))
 		.setColorValue(farbe.normal())
 		;
 
-        
+  //       cp5.addButton("addLayer")
+		// .setValue(0)
+		// .setPosition(width-(202+leftMargin),10)
+		// .setSize(100,20)
+		// .setCaptionLabel("Add Layer")
+		// .addCallback(cb)
+		// ;
 
 		println("### (HEADER) created");
 	}
@@ -71,7 +101,7 @@ class Header {
 		pushStyle();
 		fill(farbe.white());
 		noStroke();
-		rect(0,0,mDimensions.x,mDimensions.y);
+		rect(mOrigin.x, mOrigin.y, mDimensions.x, mDimensions.y);
 		// fill(farbe.dark());
 		// rect(leftMargin,(mDimensions.y/2)-11,88,11);
 		// fill(farbe.normal());
@@ -82,6 +112,18 @@ class Header {
 
 	}
 
+	void updateTranslation() {
+		mDimensions.x = width;
+		// cp5.getController("layerEnableDD"+mID).setPosition((mTranslation.x)+445, mLayerControls);
+		cp5.getController("buttonExport").setPosition(width-(100+leftMargin),mOrigin.y+10);
+		cp5.getController("buttonSaveTo").setPosition(width-(100+leftMargin),mOrigin.y+32);
+		cp5.getController("loadSettings").setPosition(width-(202+leftMargin),mOrigin.y+10);
+		cp5.getController("saveSettings").setPosition(width-(202+leftMargin),mOrigin.y+32);
+		cp5.getController("sliderTime").setPosition(leftMargin+200,mOrigin.y+(mDimensions.y/2)-11);
+		cp5.getController(mLabel).setPosition(leftMargin, mOrigin.y+(mDimensions.y/2));
+		cp5.getController("addNewLayer").setPosition(width-(304+leftMargin),mOrigin.y+10);
+	}
+
 	PVector getDimensions() {
 		return mDimensions;
 	}
@@ -89,8 +131,33 @@ class Header {
 		return mDimensions.x;
 	}
 	float getHeight() {
-		return mDimensions.y;
+		// return mDimensions.y;
+		return mOrigin.y+mDimensions.y;
 	}
+
+	void scrollUp() {
+		mOrigin.y -= 10;
+		timeline.updateTranslation();
+		updateTranslation();
+	}
+
+	void scrollDown() {
+		if(mOrigin.y+10 <= 0) {
+		mOrigin.y += 10;
+		timeline.updateTranslation();
+		updateTranslation();
+		}
+	}
+
+	void loadSettings() {
+    	cp5.loadProperties();
+    	
+	}
+
+	void saveSettings() {
+	    cp5.saveProperties();
+	}
+
 
 	void export() {
 		println("### (HEADER) export started");
@@ -98,7 +165,7 @@ class Header {
 		// settings.h
 		// how many layers we have
 		println("### (HEADER) creating settings.h");
-		PrintWriter output = createWriter(mPath+"/settings.h");
+		PrintWriter output = createWriter(mArduinoPath+"/settings.h");
 		output.println("// settings.h");
         output.println(timeline.countLayers());
 		output.flush(); // Writes the remaining data to the file
@@ -112,7 +179,7 @@ class Header {
 		// how many segments per layer
 		// ordered by layer sequence
 		print("### (HEADER) creating layers.h");
-		output = createWriter(mPath+"/layers.h");
+		output = createWriter(mArduinoPath+"/layers.h");
 		output.println("// layers.h");
 		int counter = 0;
 		for (Layer layer : timeline.getLayers()) {

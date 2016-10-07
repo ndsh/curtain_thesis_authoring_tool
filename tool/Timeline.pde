@@ -26,6 +26,7 @@ class Timeline {
     // layers.add(new Layer());
     // layers.add(new Layer());
     // layers.add(new Layer());
+    // layers.add(new Layer());
     
   }
   
@@ -51,7 +52,7 @@ class Timeline {
 
       for (Segment segment : layer.getSegments()) {
         if (mBarPosition >= segment.getPosition().x && mBarPosition <= (segment.getPosition().x+segment.getWidth())) {
-        println("segment: "+ segment.getID());
+        // println("segment: "+ segment.getID());
         
         }
       }
@@ -130,6 +131,12 @@ class Timeline {
 
   ArrayList<Layer> getLayers() {
     return layers;
+  }
+
+  void updateTranslation() {
+   for (Layer layer : layers) {
+      layer.updateTranslation();
+    } 
   }
 
 
