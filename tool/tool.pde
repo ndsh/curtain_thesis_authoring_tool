@@ -94,20 +94,16 @@ void setup() {
 
 void draw() {
   if(width != previousWidth) {
-    println("e");
     maxWidth = width-rightMargin;
     timeline.updateTranslation();
     header.updateTranslation();
     previousWidth = width;
   }
   background(farbe.normal());
-  header.draw();
   
-  for (Motor motor : motors) {
-    motor.draw();
-  }
   timeline.update();
   timeline.draw();
+  header.draw();
   
   if(mouseDebug) {
   pushStyle();
@@ -117,6 +113,9 @@ void draw() {
   text(mouseX + "|" + mouseY, mouseX+50, mouseY+38);
   popStyle();
   }  
+
+  if(timeline.getQueued()) timeline.add();
+  timeline.queues();
   
 }
 
@@ -141,6 +140,10 @@ void keyPressed() {
       header.scrollUp();
     } else if (keyCode == DOWN) {
       header.scrollDown();
+    } else if (keyCode == LEFT) {
+      timeline.add();
+    } else if (keyCode == RIGHT) {
+      timeline.remove();
     }
   }
 }

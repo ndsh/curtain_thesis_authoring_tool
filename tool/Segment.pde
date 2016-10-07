@@ -36,7 +36,7 @@ class Segment {
     mSize = new PVector((int)random(50,200), mLayer.mSize.y-7);
     mGrabArea = 32;
     
-    println("### (SEGMENT) created");
+    println("### (SEGMENT) created on layer #"+ mLayer.getID());
     mID = mLayer.mSegmentCounter;
     mUniqueID = mLayer.getID()+"_"+mID;
     mLayer.mSegmentCounter++;
@@ -46,6 +46,8 @@ class Segment {
         public void controlEvent(CallbackEvent theEvent) {
           if (theEvent.getController().getName().equals("sliderTime"+mUniqueID)) {
             mTargetDirection = (int)theEvent.getController().getValue();
+          } else if (theEvent.getController().getName().equals("removeSegment"+mUniqueID)) {
+            if(theEvent.getController().isMousePressed()) removeYourself();
           }
         }
     };
@@ -63,6 +65,13 @@ class Segment {
     .setColorValueLabel(farbe.normal())
     .showTickMarks(false)
     .addCallback(cb)
+    ;
+    cp5.addButton("removeSegment"+mUniqueID)
+    .setPosition(mPosition.x,mPosition.y)
+    .setSize(16,16)
+    .setCaptionLabel("x")
+    .addCallback(cb)
+
     ;
 
   }
@@ -129,10 +138,21 @@ class Segment {
     contextMenu(mContext);
   }
 
+  void removeYourself() {
+    mLayer.removeQueue(mID);
+  }
+
+  void removeItems() {
+    cp5.getController("sliderTime"+mUniqueID).remove();
+    cp5.getController("removeSegment"+mUniqueID).remove();
+  }
+
   void contextMenu(boolean b) {
     if(b) {
       cp5.getController("sliderTime"+mUniqueID).setVisible(true);
+      cp5.getController("removeSegment"+mUniqueID).setVisible(true);
       cp5.getController("sliderTime"+mUniqueID).setPosition(mPosition.x+3,mPosition.y+mSize.y+4);
+      cp5.getController("removeSegment"+mUniqueID).setPosition(mPosition.x+mSize.x-16,mPosition.y+mSize.y+7);
       pushMatrix();
       translate(mPosition.x, mPosition.y+mSize.y);
       pushStyle();
@@ -144,6 +164,7 @@ class Segment {
       popMatrix();
     } else {
       cp5.getController("sliderTime"+mUniqueID).setVisible(false);
+      cp5.getController("removeSegment"+mUniqueID).setVisible(false);
     }
   }
 

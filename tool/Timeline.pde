@@ -13,6 +13,7 @@ class Timeline {
   int mTimeBarWidth = 5;
   int mTimeBarColor = 360;
   int mGrabArea = 20;
+  boolean mQueued = false;
 
   Timeline(float _mTotalPlayTime) {
     this.mTotalPlayTime = _mTotalPlayTime;
@@ -22,12 +23,27 @@ class Timeline {
   void add() {
     println("### (TIMELINE) adding new layer…");
     layers.add(new Layer());
-    layers.add(new Layer());
-    // layers.add(new Layer());
-    // layers.add(new Layer());
-    // layers.add(new Layer());
-    // layers.add(new Layer());
-    
+    mQueued = false;
+  }
+
+  void addQueue() {
+    mQueued = true;
+  }
+
+  boolean getQueued() {
+    return mQueued;
+  }
+
+  void remove() { //overload this constructor. now it should just remove the last element
+    // println(layers.size());
+    // for (int i = layers.size() - 1; i >= layers.size() - 2; i--) {
+      // Layer layer = layers.get(layers.size() - 1);
+      if(layers.size() > 0) {
+        layers.get(layers.size() - 1).removeSegments();
+        layers.remove(layers.size() - 1);
+      }
+      // println(i);
+    // }
   }
   
   void toggle() {
@@ -42,6 +58,13 @@ class Timeline {
       }
     }
     detectLayers();
+  }
+
+  void queues() {
+    for(Layer layer : layers) {
+      if(layer.getQueued()) layer.add();
+      if(layer.getQueuedSegments()) layer.removeSegment(layer.getQueuedSegmentsID());
+    }
   }
 
   void detectLayers() {

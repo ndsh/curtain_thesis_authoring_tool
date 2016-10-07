@@ -7,8 +7,11 @@ class Layer {
   PVector mSize;
   PVector mTranslation;
   int mSegmentCounter;
-  String[] mLayerMode = {"Stepper", "Servo"};
+  String[] mLayerMode = {"Curtain: Up+Down", "Curtain: Left+Right", "Servo"};
   String[] mNumber;
+  boolean mQueued = false;
+  boolean mSegmentQueue = false;
+  int mRemovableSegment = -1;
   
   float mLayerControls;
 
@@ -39,7 +42,7 @@ class Layer {
     mSize = new PVector(maxWidth, 39);
     mID = _mID;
     mLayerCounter++;
-    mTranslation = new PVector(leftMargin, (header.getHeight()+mSize.y/2+((mID))*mSize.y)+(mSize.y/1.2*mID));
+    mTranslation = new PVector(leftMargin, (header.getHeight()+mSize.y/2+((getPosition()))*mSize.y)+(mSize.y/1.2*getPosition()));
     mLayerControls = mTranslation.y+mSize.y+3;
 
     int tPins = 54;
@@ -66,120 +69,206 @@ class Layer {
           mPinDir = (int)theEvent.getController().getValue();
         } else if (theEvent.getController().getName().equals("layerEnableDD"+mID)) {
           mPinEnable = (int)theEvent.getController().getValue();
+        } else if (theEvent.getController().getName().equals("addSegment"+mID)) {
+          if(theEvent.getController().isMousePressed()) addQueue();
+        } else if (theEvent.getController().getName().equals("removeSegment"+mID)) {
+          // if(theEvent.getController().isMousePressed()) remove(); // das muss noch ausgebufft werdne. aktives element löschen?
         }
         // println(mMotorMode + " /" + mMotorNumber + " /" + mPinStep + " /" + mPinDir + " /" + mPinEnable);
       }
     };
 
     cp5.addScrollableList("layerMode"+mID)
-    .setPosition(mTranslation.x-1, mLayerControls)
-    .setSize(200, 100)
-    .setBarHeight(20)
-    .setItemHeight(20)
-    .addItems(mLayerMode)
-    .setType(ScrollableList.DROPDOWN) // currently supported DROPDOWN and LIST
-    .addCallback(cb)
-    .setCaptionLabel("MOTOR")
-    .setOpen(false)
-    .setColorForeground(farbe.white())
-    .setColorBackground(farbe.light())
-    .setColorActive(farbe.light())
-    .setColorCaptionLabel(farbe.normal())
-    .setColorValueLabel(farbe.normal())
-    ;
-
+      .setPosition(mTranslation.x-1, mLayerControls)
+      .setSize(200, 100)
+      .setBarHeight(20)
+      .setItemHeight(20)
+      .addItems(mLayerMode)
+      .setType(ScrollableList.DROPDOWN) // currently supported DROPDOWN and LIST
+      .addCallback(cb)
+      .setCaptionLabel("MOTOR")
+      .setOpen(false)
+      .setColorForeground(farbe.white())
+      .setColorBackground(farbe.light())
+      .setColorActive(farbe.light())
+      .setColorCaptionLabel(farbe.normal())
+      .setColorValueLabel(farbe.normal())
+      ;
     mLabelNumber = cp5.addTextlabel("labelNumber"+mID)
-    .setText("#")
-    .setPosition(mTranslation.x+200, mLayerControls+4)
-    .setColorValue(farbe.white())
-    ;
-
+      .setText("#")
+      .setPosition(mTranslation.x+200, mLayerControls+4)
+      .setColorValue(farbe.white())
+      ;
     cp5.addScrollableList("layerNumber"+mID)
-    .setPosition((mTranslation.x)+215, mLayerControls)
-    .setSize(30, 70)
-    .setBarHeight(20)
-    .setItemHeight(20)
-    .addItems(mLayersNumber)
-    .setType(ScrollableList.DROPDOWN) // currently supported DROPDOWN and LIST
-    .addCallback(cb)
-    .setCaptionLabel("-")
-    .setOpen(false)
-    .setColorForeground(farbe.white())
-    .setColorBackground(farbe.light())
-    .setColorActive(farbe.light())
-    .setColorCaptionLabel(farbe.normal())
-    .setColorValueLabel(farbe.normal())
-    ;
-
+      .setPosition((mTranslation.x)+215, mLayerControls)
+      .setSize(30, 70)
+      .setBarHeight(20)
+      .setItemHeight(20)
+      .addItems(mLayersNumber)
+      .setType(ScrollableList.DROPDOWN) // currently supported DROPDOWN and LIST
+      .addCallback(cb)
+      .setCaptionLabel("-")
+      .setOpen(false)
+      .setColorForeground(farbe.white())
+      .setColorBackground(farbe.light())
+      .setColorActive(farbe.light())
+      .setColorCaptionLabel(farbe.normal())
+      .setColorValueLabel(farbe.normal())
+      ;
     mLabelStep = cp5.addTextlabel("labelStep"+mID)
-    .setText("STEP")
-    .setPosition(mTranslation.x+265, mLayerControls+4)
-    .setColorValue(farbe.white())
-    ;
+      .setText("STEP")
+      .setPosition(mTranslation.x+265, mLayerControls+4)
+      .setColorValue(farbe.white())
+      ;
     cp5.addScrollableList("layerStepDD"+mID)
-    .setPosition((mTranslation.x)+300, mLayerControls)
-    .setSize(30, 70)
-    .setBarHeight(20)
-    .setItemHeight(20)
-    .addItems(mNumber)
-    .setType(ScrollableList.DROPDOWN) // currently supported DROPDOWN and LIST
-    .addCallback(cb)
-    .setCaptionLabel("-")
-    .setOpen(false)
-    .setColorForeground(farbe.white())
-    .setColorBackground(farbe.light())
-    .setColorActive(farbe.light())
-    .setColorCaptionLabel(farbe.normal())
-    .setColorValueLabel(farbe.normal())
-    ;
+      .setPosition((mTranslation.x)+300, mLayerControls)
+      .setSize(30, 70)
+      .setBarHeight(20)
+      .setItemHeight(20)
+      .addItems(mNumber)
+      .setType(ScrollableList.DROPDOWN) // currently supported DROPDOWN and LIST
+      .addCallback(cb)
+      .setCaptionLabel("-")
+      .setOpen(false)
+      .setColorForeground(farbe.white())
+      .setColorBackground(farbe.light())
+      .setColorActive(farbe.light())
+      .setColorCaptionLabel(farbe.normal())
+      .setColorValueLabel(farbe.normal())
+      ;
     mLabelDir = cp5.addTextlabel("labelDir"+mID)
-    .setText("DIR")
-    .setPosition(mTranslation.x+340, mLayerControls+4)
-    .setColorValue(farbe.white())
-    ;
+      .setText("DIR")
+      .setPosition(mTranslation.x+340, mLayerControls+4)
+      .setColorValue(farbe.white())
+      ;
     cp5.addScrollableList("layerDirDD"+mID)
-    .setPosition((mTranslation.x)+365, mLayerControls)
-    .setSize(30, 70)
-    .setBarHeight(20)
-    .setItemHeight(20)
-    .addItems(mNumber)
-    .setType(ScrollableList.DROPDOWN) // currently supported DROPDOWN and LIST
-    .addCallback(cb)
-    .setCaptionLabel("-")
-    .setOpen(false)
-    .setColorForeground(farbe.white())
-    .setColorBackground(farbe.light())
-    .setColorActive(farbe.light())
-    .setColorCaptionLabel(farbe.normal())
-    .setColorValueLabel(farbe.normal())
-    ;
+      .setPosition((mTranslation.x)+365, mLayerControls)
+      .setSize(30, 70)
+      .setBarHeight(20)
+      .setItemHeight(20)
+      .addItems(mNumber)
+      .setType(ScrollableList.DROPDOWN) // currently supported DROPDOWN and LIST
+      .addCallback(cb)
+      .setCaptionLabel("-")
+      .setOpen(false)
+      .setColorForeground(farbe.white())
+      .setColorBackground(farbe.light())
+      .setColorActive(farbe.light())
+      .setColorCaptionLabel(farbe.normal())
+      .setColorValueLabel(farbe.normal())
+      ;
     mLabelEnable = cp5.addTextlabel("labelEnable"+mID)
-    .setText("ENABLE")
-    .setPosition(mTranslation.x+400, mLayerControls+4)
-    .setColorValue(farbe.white())
-    ;
+      .setText("ENABLE")
+      .setPosition(mTranslation.x+400, mLayerControls+4)
+      .setColorValue(farbe.white())
+      ;
     cp5.addScrollableList("layerEnableDD"+mID)
-    .setPosition((mTranslation.x)+445, mLayerControls)
-    .setSize(30, 70)
-    .setBarHeight(20)
-    .setItemHeight(20)
-    .addItems(mNumber)
-    .setType(ScrollableList.DROPDOWN) // currently supported DROPDOWN and LIST
-    .addCallback(cb)
-    .setCaptionLabel("-")
-    .setOpen(false)
-    .setColorForeground(farbe.white())
-    .setColorBackground(farbe.light())
-    .setColorActive(farbe.light())
-    .setColorCaptionLabel(farbe.normal())
-    .setColorValueLabel(farbe.normal())
-    ;
+      .setPosition((mTranslation.x)+445, mLayerControls)
+      .setSize(30, 70)
+      .setBarHeight(20)
+      .setItemHeight(20)
+      .addItems(mNumber)
+      .setType(ScrollableList.DROPDOWN) // currently supported DROPDOWN and LIST
+      .addCallback(cb)
+      .setCaptionLabel("-")
+      .setOpen(false)
+      .setColorForeground(farbe.white())
+      .setColorBackground(farbe.light())
+      .setColorActive(farbe.light())
+      .setColorCaptionLabel(farbe.normal())
+      .setColorValueLabel(farbe.normal())
+      ;
+    mLabelEnable = cp5.addTextlabel("labelSegments"+mID)
+      .setText("SEGMENTS")
+      .setPosition(mTranslation.x+500, mLayerControls+4)
+      .setColorValue(farbe.white())
+      ;
+    cp5.addButton("addSegment"+mID)
+      .setPosition((mTranslation.x)+560, mLayerControls)
+      .setSize(20,20)
+      .setCaptionLabel("+")
+      .addCallback(cb)
+      .setColorForeground(farbe.white())
+      .setColorBackground(farbe.light())
+      .setColorActive(farbe.light())
+      .setColorCaptionLabel(farbe.normal())
+      .setColorValueLabel(farbe.normal())
+      ;
   }
   
   void add() {
     println("### (LAYER) adding new segment...");
     segments.add(new Segment(this));
-    
+    mQueued = false;
+  }
+
+  void addQueue() {
+    mQueued = true;
+  }
+
+  boolean getQueued() {
+    return mQueued;
+  }
+
+  void removeSegment(int tID) {
+    int i = 0;
+    int qID = -1;
+    for (Segment segment : segments) {
+      if(segments.get(i).getID() == tID) {
+        // segments.remove(i);
+        qID = segments.get(i).getID();
+        break;
+      }
+      i++;
+    }
+    if(qID != -1 && qID == tID) {
+      segments.get(i).removeItems();
+      segments.remove(i);
+      mSegmentQueue = false;
+      mRemovableSegment = -1;
+    }
+  }
+  void removeQueue(int tID) {
+    mSegmentQueue = true;
+    mRemovableSegment = tID;
+  }
+
+  boolean getQueuedSegments() {
+    return mSegmentQueue;
+  }
+
+  int getQueuedSegmentsID() {
+    return mRemovableSegment;
+  }
+
+  void removeSegments() {
+    cp5.getController("layerEnableDD"+mID).remove();
+    cp5.getController("labelEnable"+mID).remove();
+    cp5.getController("layerDirDD"+mID).remove();
+    cp5.getController("labelDir"+mID).remove();
+    cp5.getController("layerStepDD"+mID).remove();
+    cp5.getController("labelStep"+mID).remove();
+    cp5.getController("layerNumber"+mID).remove();
+    cp5.getController("labelNumber"+mID).remove();
+    cp5.getController("layerMode"+mID).remove();
+    cp5.getController("labelSegments"+mID).remove();
+    cp5.getController("addSegment"+mID).remove();
+    for (int i = segments.size() - 1; i >= 0; i--) {
+        // segments.get(i).removeYourself();
+
+        segments.remove(i);
+    }
+  }
+
+  int getPosition() {
+    int c = 0;
+    for (Layer layer : timeline.getLayers()) {
+      if(layer.getID() == mID) {
+        break;
+      }
+      c++;
+    }
+    return c;
   }
   
   void draw() {
@@ -216,7 +305,7 @@ class Layer {
     mTranslation = new PVector(leftMargin, (header.getHeight()+mSize.y/2+((mID))*mSize.y)+(mSize.y/1.2*mID));
     mLayerControls = mTranslation.y+mSize.y+3; // does not work. have to update all controls one by one
     // cp5.getController("sliderTime"+mUniqueID).setPosition(mPosition.x+3,mPosition.y+mSize.y+4);
-   cp5.getController("layerEnableDD"+mID).setPosition((mTranslation.x)+445, mLayerControls);
+    cp5.getController("layerEnableDD"+mID).setPosition((mTranslation.x)+445, mLayerControls);
     cp5.getController("labelEnable"+mID).setPosition(mTranslation.x+400, mLayerControls+4);
     cp5.getController("layerDirDD"+mID).setPosition((mTranslation.x)+365, mLayerControls);
     cp5.getController("labelDir"+mID).setPosition(mTranslation.x+340, mLayerControls+4);
@@ -226,6 +315,8 @@ class Layer {
     cp5.getController("labelNumber"+mID).setPosition(mTranslation.x+200, mLayerControls+4);
     cp5.getController("layerMode"+mID).setPosition(mTranslation.x-1, mLayerControls);    
     cp5.getController("layerEnableDD"+mID).setPosition((mTranslation.x)+445, mLayerControls);
+    cp5.getController("labelSegments"+mID).setPosition(mTranslation.x+500, mLayerControls+4);
+    cp5.getController("addSegment"+mID).setPosition((mTranslation.x)+560, mLayerControls);
     for (Segment segment : segments) {
       segment.updateTranslation();
     } 

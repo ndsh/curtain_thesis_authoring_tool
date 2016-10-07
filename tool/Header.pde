@@ -24,6 +24,10 @@ class Header {
 	            	if(theEvent.getController().isMousePressed()) loadSettings();
 	            } else if (theEvent.getController().getName().equals("saveSettings")) {
 	            	if(theEvent.getController().isMousePressed()) saveSettings();
+	            } else if (theEvent.getController().getName().equals("addNewLayer")) {
+	            	if(theEvent.getController().isMousePressed()) timeline.addQueue();
+	            } else if (theEvent.getController().getName().equals("removeLayer")) {
+	            	if(theEvent.getController().isMousePressed()) timeline.remove();
 	            }
 			}
 		};
@@ -58,9 +62,15 @@ class Header {
 		;
 		cp5.addButton("addNewLayer")
 		.setPosition(width-(304+leftMargin),mOrigin.y+10)
+		.setSize(100,20)
+		.setCaptionLabel("Add Layer")
+		.addCallback(cb)
+		;
+		cp5.addButton("removeLayer")
+		.setPosition(width-(304+leftMargin),mOrigin.y+32)
 		.setValue(0)
 		.setSize(100,20)
-		.setCaptionLabel("Add Layer...")
+		.setCaptionLabel("Remove Layer")
 		.addCallback(cb)
 		;
 		cp5.addSlider("sliderTime")
@@ -122,6 +132,7 @@ class Header {
 		cp5.getController("sliderTime").setPosition(leftMargin+200,mOrigin.y+(mDimensions.y/2)-11);
 		cp5.getController(mLabel).setPosition(leftMargin, mOrigin.y+(mDimensions.y/2));
 		cp5.getController("addNewLayer").setPosition(width-(304+leftMargin),mOrigin.y+10);
+		cp5.getController("removeLayer").setPosition(width-(304+leftMargin),mOrigin.y+32);
 	}
 
 	PVector getDimensions() {
