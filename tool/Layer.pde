@@ -12,6 +12,7 @@ class Layer {
   boolean mQueued = false;
   boolean mSegmentQueue = false;
   int mRemovableSegment = -1;
+  int mMargin = 3;
   
   float mLayerControls;
 
@@ -54,8 +55,8 @@ class Layer {
 
     println("### (LAYER) ("+mID+") created");
 
-    float r = random(0,5);
-    for(float i = 0; i<r; i+=1.) add();
+    // float r = random(0,5);
+    // for(float i = 0; i<r; i+=1.) add();
 
     cb = new CallbackListener() {
       public void controlEvent(CallbackEvent theEvent) {
@@ -202,6 +203,12 @@ class Layer {
     mQueued = false;
   }
 
+  void add(float tDirection, PVector tPosition, PVector tSize) {
+    println("### (LAYER) adding new segment...");
+    segments.add(new Segment(this, tDirection, tPosition, tSize));
+    mQueued = false;
+  }
+
   void addQueue() {
     mQueued = true;
   }
@@ -270,39 +277,80 @@ class Layer {
     }
     return c;
   }
+
+  int getMotorMode() {
+    return mMotorMode;
+  }
+
+  int getMotorNumber() {
+    return mMotorNumber;
+  }
+
+  int getPinStep() {
+    return mPinStep;
+  }
+
+  int getPinDir() {
+    return mPinDir;
+  }
+
+  int getPinEnable() {
+    return mPinEnable;
+  }
+
+  void update(){
+    for (Segment segment : segments) {
+      segment.update();
+    }
+  } 
   
   void draw() {
-    pushStyle();
-    noFill();
-    strokeWeight(2);
-    stroke(0, 0, 100);
-    rect(mTranslation.x, mTranslation.y, mSize.x, mSize.y);
-    popStyle();
+    if(!simulationMode) {
+      cp5.getController("layerEnableDD"+mID).show();
+      cp5.getController("labelEnable"+mID).show();
+      cp5.getController("layerDirDD"+mID).show();
+      cp5.getController("labelDir"+mID).show();
+      cp5.getController("layerStepDD"+mID).show();
+      cp5.getController("labelStep"+mID).show();
+      cp5.getController("layerNumber"+mID).show();
+      cp5.getController("labelNumber"+mID).show();
+      cp5.getController("layerMode"+mID).show();
+      cp5.getController("layerEnableDD"+mID).show();
+      cp5.getController("labelSegments"+mID).show();
+      cp5.getController("addSegment"+mID).show();
 
-    /*
-    pushStyle();
-    rectMode(CORNER);
-    stroke(255);
-    if(mHover) fill(0,125,255);
-    else fill(0); 
-    
-    rect(mPosition.x, mPosition.y, mWidth, 20);
-    fill(255);
-    text("#"+mID, mPosition.x, mPosition.y+5);
-    text(mPosition.x + "|" + mPosition.y, mPosition.x, mPosition.y+40);
-    popStyle();
-    mHover = false;
-    */
-    
-    for (Segment segment : segments) {
-      segment.draw();
+      pushMatrix();
+      pushStyle();
+      translate(mTranslation.x, mTranslation.y);
+      noFill();
+      strokeWeight(2);
+      stroke(0, 0, 100);
+      rect(0, 0, mSize.x, mSize.y);
+      popStyle();
+      popMatrix();    
+      for (Segment segment : segments) {
+        segment.draw();
+      }
+    } else {
+      cp5.getController("layerEnableDD"+mID).hide();
+      cp5.getController("labelEnable"+mID).hide();
+      cp5.getController("layerDirDD"+mID).hide();
+      cp5.getController("labelDir"+mID).hide();
+      cp5.getController("layerStepDD"+mID).hide();
+      cp5.getController("labelStep"+mID).hide();
+      cp5.getController("layerNumber"+mID).hide();
+      cp5.getController("labelNumber"+mID).hide();
+      cp5.getController("layerMode"+mID).hide();
+      cp5.getController("layerEnableDD"+mID).hide();
+      cp5.getController("labelSegments"+mID).hide();
+      cp5.getController("addSegment"+mID).hide();
     }
   }
 
   void updateTranslation() {
     mSize.x = maxWidth;
     // println(mSize.x);
-    mTranslation = new PVector(leftMargin, (header.getHeight()+mSize.y/2+((mID))*mSize.y)+(mSize.y/1.2*mID));
+    mTranslation = new PVector(leftMargin, (header.getHeight()+mSize.y/2+((getPosition()))*mSize.y)+(mSize.y/1.2*getPosition()));
     mLayerControls = mTranslation.y+mSize.y+3; // does not work. have to update all controls one by one
     // cp5.getController("sliderTime"+mUniqueID).setPosition(mPosition.x+3,mPosition.y+mSize.y+4);
     cp5.getController("layerEnableDD"+mID).setPosition((mTranslation.x)+445, mLayerControls);

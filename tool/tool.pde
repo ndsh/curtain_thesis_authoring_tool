@@ -32,6 +32,8 @@ float mStepResolution = 0.014; // 10 seconds = 14 cm
 Timeline timeline;
 UserInterface ui;
 
+float mGrabArea = 32;
+
 PFont mFont;
 
 // int mSegmentCounter = 0;
@@ -52,7 +54,9 @@ int previousWidth;
 int leftMargin;
 int rightMargin;
 
-String mArduinoPath = "/Volumes/Macintosh HD/Users/julianhespenheide/Programming/Gitshit/Non-work/irena_thesis/curtain_thesis_authoring_tool/tool/export/";
+String mArduinoPath = "";
+
+boolean simulationMode = false;
 
 void setup() {
   size(displayWidth, 400);
@@ -76,6 +80,7 @@ void setup() {
   farbe = new Farbe();
   ui = new UserInterface();
   header = new Header();
+
   
   previousWidth = width;
 
@@ -86,13 +91,17 @@ void setup() {
 
   // add some things
   timeline = new Timeline(mTotalPlayTime);
-  motors.add(new Motor("Motor S", 1, true));
-  timeline.add();
+  header.loadTimeline();
+  // motors.add(new Motor("Motor S", 1, true));
+  // timeline.add();
 
-  timeline.getExport();
+  String tLines[] = loadStrings("data/settings/settings.cfg");
+  if(tLines.length > 0) if(tLines[0].length() > 0) mArduinoPath = tLines[0]+"/";
 }
 
 void draw() {
+  
+
   if(width != previousWidth) {
     maxWidth = width-rightMargin;
     timeline.updateTranslation();
@@ -116,6 +125,30 @@ void draw() {
 
   if(timeline.getQueued()) timeline.add();
   timeline.queues();
+
+  if(simulationMode) {
+
+    pushMatrix();
+    pushStyle();
+
+    fill(farbe.light());
+    rect(0,0,width,height);
+
+    stroke(farbe.white());
+    translate(width/12*0, height/2);
+    translate(100, -150);
+    line(0,0,200,100);
+    line(0,0,0,20); // links
+    line(200,100,200,120); // rechts
+    line(0,20,200,120);
+    println(timeline.detectLayers());
+
+    // get active segment and active layer
+    // determine segment width and x position (map this)
+    // get values from segments before
+    popStyle();
+    popMatrix();
+  }
   
 }
 
@@ -134,6 +167,8 @@ void mouseReleased() {
 void keyPressed() {
   if (key == ' ') {
       timeline.toggle();
+  } else if (key == 's' || key == 'S') {
+    simulationMode = !simulationMode;
   }
   if (key == CODED) {
     if (keyCode == UP) {
@@ -152,7 +187,7 @@ void folderSelected(File selection) {
     if (selection == null) {
       println("Window was closed or the user hit cancel.");
     } else {
-      mArduinoPath = selection.getAbsolutePath();
+      mArduinoPath = selection.getAbsolutePath() +"/";
       println("User selected " + selection.getAbsolutePath());
     }
   }

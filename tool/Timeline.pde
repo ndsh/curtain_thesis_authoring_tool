@@ -21,8 +21,14 @@ class Timeline {
   }
   
   void add() {
-    println("### (TIMELINE) adding new layer…");
+    println("### (TIMELINE) adding new layer...");
     layers.add(new Layer());
+    mQueued = false;
+  }
+
+  void add(int tID) {
+    println("### (TIMELINE) adding new layer...");
+    layers.add(new Layer(tID));
     mQueued = false;
   }
 
@@ -51,6 +57,10 @@ class Timeline {
   }
   
   void update() {
+    for (Layer layer : layers) {
+      layer.update();
+    }
+    // not good yet
     if(mPlay) {
       if(mPrevMillis != millis()) {
         mBarPosition += 0.1;
@@ -67,20 +77,19 @@ class Timeline {
     }
   }
 
-  void detectLayers() {
+  ArrayList<PVector> detectLayers() {
+    ArrayList<PVector> tReturn = new ArrayList<PVector>();
     for (Layer layer : layers) {
-      //layer.getPosition();
-      //println(layer.getPosition());
-      //println(mBarPosition);
-
       for (Segment segment : layer.getSegments()) {
-        if (mBarPosition >= segment.getPosition().x && mBarPosition <= (segment.getPosition().x+segment.getWidth())) {
-        // println("segment: "+ segment.getID());
-        
+        if (mBarPosition >= segment.getPosition().x && mBarPosition <= (segment.getPosition().x+segment.getWidth())) {        
+          //println("a");
+          //for detecting layers.. go here.
+          tReturn.add(new PVector(layer.getID(), segment.getID()));
         }
       }
       
     }
+    return tReturn;
   }
   
   void draw() {
@@ -156,6 +165,19 @@ class Timeline {
     return layers;
   }
 
+  Layer getLayer(int tID) {
+    int i = 0;
+    Layer mReturn = null;
+    for (Layer layer : layers) {
+      if(layers.get(i).getID() == tID) {
+        mReturn = layers.get(i);
+        break;
+      }
+      i++;
+    }
+    return mReturn;
+  }
+
   void updateTranslation() {
    for (Layer layer : layers) {
       layer.updateTranslation();
@@ -163,17 +185,19 @@ class Timeline {
   }
 
 
-  void getExport() {
+  ArrayList<ArrayList> getExport() {
+    ArrayList<ArrayList> tReturn = new ArrayList<ArrayList>();
     for (Layer layer : layers) {
 
       // REMOVE ME!!!
       // if(layer.getID() == 1) {
         // println(layer.sortSegments());
         // println(layer.getNullSegments());
-        println(layer.sortSegments(layer.mergeLists(layer.getSegmentsWithID(), layer.getNullSegments())));
+        tReturn.add(layer.sortSegments(layer.mergeLists(layer.getSegmentsWithID(), layer.getNullSegments())));
       // }
       
     }
+    return tReturn;
   }
   
  }

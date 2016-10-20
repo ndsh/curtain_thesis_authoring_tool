@@ -2,16 +2,15 @@ class Segment {
   
   //position
   int mID = 0;
-  float mGrabArea;
+  
   
   Layer mLayer;
   
-  int mMargin = 3;
   String mLabel;
   String mUniqueID;
 
   //values we need to save into a file
-  float mTargetDirection = 0;
+  float mTargetDirection;
   PVector mPosition;
   PVector mSize;
 
@@ -29,12 +28,18 @@ class Segment {
   Knob mKnobDistance;
 
   // display where the current cm is right now at any given point of time
-  
-  Segment(Layer _mLayer)  {
-    mLayer = _mLayer;
-    mPosition = new PVector(random(mLayer.mTranslation.x, mLayer.mSize.x), mLayer.mTranslation.y+mMargin);
-    mSize = new PVector((int)random(50,200), mLayer.mSize.y-7);
-    mGrabArea = 32;
+  Segment(Layer tLayer) {
+    this(tLayer, 0, new PVector(random(tLayer.mTranslation.x, tLayer.mSize.x), tLayer.mTranslation.y+tLayer.mMargin), new PVector((int)random(50,200), tLayer.mSize.y-7));
+    
+  }
+
+  Segment(Layer tLayer, float tDirection, PVector tPosition, PVector tSize)  {
+
+    mLayer = tLayer;
+    mTargetDirection = tDirection;
+    mPosition = tPosition;
+    mSize = tSize;
+    // mGrabArea = 32;
     
     println("### (SEGMENT) created on layer #"+ mLayer.getID());
     mID = mLayer.mSegmentCounter;
@@ -75,66 +80,77 @@ class Segment {
     ;
 
   }
-  
-  void draw() {
+  void update() {
     if(gLocked == null) detect();
-    pushStyle();
-    stroke(farbe.light());
-    if(mHover) {
-      stroke(farbe.white());
-      fill(farbe.light());
-      if(mLocked && mGrab == 0) fill(farbe.white());
+  }
+
+  void draw() {
+    if(!simulationMode) {
+      cp5.getController("sliderTime"+mUniqueID).show();
+      cp5.getController("removeSegment"+mUniqueID).show();
+
+      pushStyle();
+      stroke(farbe.light());
+      if(mHover) {
+        stroke(farbe.white());
+        fill(farbe.light());
+        if(mLocked && mGrab == 0) fill(farbe.white());
+      } else {
+        if(mContext) fill(farbe.white()); 
+        else fill(farbe.light()); 
+      }
+      
+      noStroke();
+      rect(mPosition.x, mPosition.y, mSize.x, mSize.y);
+
+      // grab area
+      
+      // fill(360,100,100);
+      rect(mPosition.x+mSize.x-mGrabArea+1, mPosition.y+1, mGrabArea-1, mSize.y-1);
+      stroke(farbe.normal());
+      // stroke(90,100,100);
+      line(mPosition.x+mSize.x-mGrabArea, mPosition.y+1, mPosition.x+mSize.x-mGrabArea, mPosition.y+mSize.y-1);
+      pushMatrix();
+      translate(mPosition.x+mSize.x-mGrabArea+(mGrabArea/4), mPosition.y+(mSize.y/2));
+      line(0,-3,16,-3);
+      line(0,0,16,0);
+      line(0,3,16,3);
+      popMatrix();
+      noStroke();
+      //text(mWidth, mPosition.x, mPosition.y+5);
+      //text("#"+mID, mPosition.x, mPosition.y+5);
+      //text(mPosition.x + "|" + mPosition.y, mPosition.x, mPosition.y+40);
+      pushMatrix();
+      pushStyle();
+      translate(mPosition.x+10, mPosition.y+(mSize.y/2)+5);
+
+      // needs refinement
+      // stroke(farbe.white());
+      //line(0,0,10,(map(abs(getSteps()), 0, 150000, 0, 200))*-1);
+      // String tSpeed = "";
+      // if(getSteps() == 0) tSpeed = "stationary";
+      // else if(getSteps() > 0 && getSteps() <= 50) tSpeed = "slow";
+      // else if(getSteps() > 50 && getSteps() <= 150) tSpeed = "medium";
+      // else if(getSteps() > 150) tSpeed = "fast";
+      // fill(farbe.normal());
+      // text(tSpeed, 0,10);
+      
+      //mHover = false;
+      
+      fill(farbe.normal());
+      if(mSize.x > 110) mLabel = readableTime(getTime()) + " | "+ (int)mTargetDirection +"cm";
+      else if(mSize.x <= 110 && mSize.x > 60) mLabel = readableTime(getTime());
+      else mLabel = "";
+      text(mLabel, 0,0);
+      
+      popStyle();
+      popMatrix();
+
+      
     } else {
-      if(mContext) fill(farbe.white()); 
-      else fill(farbe.light()); 
+      cp5.getController("sliderTime"+mUniqueID).hide();
+      cp5.getController("removeSegment"+mUniqueID).hide();
     }
-    
-    noStroke();
-    rect(mPosition.x, mPosition.y, mSize.x, mSize.y);
-
-    // grab area
-    
-    // fill(360,100,100);
-    rect(mPosition.x+mSize.x-mGrabArea+1, mPosition.y+1, mGrabArea-1, mSize.y-1);
-    stroke(farbe.normal());
-    // stroke(90,100,100);
-    line(mPosition.x+mSize.x-mGrabArea, mPosition.y+1, mPosition.x+mSize.x-mGrabArea, mPosition.y+mSize.y-1);
-    pushMatrix();
-    translate(mPosition.x+mSize.x-mGrabArea+(mGrabArea/4), mPosition.y+(mSize.y/2));
-    line(0,-3,16,-3);
-    line(0,0,16,0);
-    line(0,3,16,3);
-    popMatrix();
-    noStroke();
-    //text(mWidth, mPosition.x, mPosition.y+5);
-    //text("#"+mID, mPosition.x, mPosition.y+5);
-    //text(mPosition.x + "|" + mPosition.y, mPosition.x, mPosition.y+40);
-    pushMatrix();
-    pushStyle();
-    translate(mPosition.x+10, mPosition.y+(mSize.y/2)+5);
-
-    // needs refinement
-    // stroke(farbe.white());
-    //line(0,0,10,(map(abs(getSteps()), 0, 150000, 0, 200))*-1);
-    // String tSpeed = "";
-    // if(getSteps() == 0) tSpeed = "stationary";
-    // else if(getSteps() > 0 && getSteps() <= 50) tSpeed = "slow";
-    // else if(getSteps() > 50 && getSteps() <= 150) tSpeed = "medium";
-    // else if(getSteps() > 150) tSpeed = "fast";
-    // fill(farbe.normal());
-    // text(tSpeed, 0,10);
-    
-    //mHover = false;
-    
-    fill(farbe.normal());
-    if(mSize.x > 110) mLabel = readableTime(getTime()) + " | "+ (int)mTargetDirection +"cm";
-    else if(mSize.x <= 110 && mSize.x > 60) mLabel = readableTime(getTime());
-    else mLabel = "";
-    text(mLabel, 0,0);
-    
-    popStyle();
-    popMatrix();
-
     contextMenu(mContext);
   }
 
@@ -148,33 +164,44 @@ class Segment {
   }
 
   void contextMenu(boolean b) {
-    if(b) {
-      cp5.getController("sliderTime"+mUniqueID).setVisible(true);
-      cp5.getController("removeSegment"+mUniqueID).setVisible(true);
-      cp5.getController("sliderTime"+mUniqueID).setPosition(mPosition.x+3,mPosition.y+mSize.y+4);
-      cp5.getController("removeSegment"+mUniqueID).setPosition(mPosition.x+mSize.x-16,mPosition.y+mSize.y+7);
-      pushMatrix();
-      translate(mPosition.x, mPosition.y+mSize.y);
-      pushStyle();
-      fill(farbe.white());
-      rect(0,0, constrain(mSize.x, 100, mSize.x), 23);
-      stroke(farbe.normal());
-      line(-1,-1,constrain(mSize.x, 100, mSize.x), -1);
-      popStyle();
-      popMatrix();
+    if(!simulationMode) {
+      cp5.getController("sliderTime"+mUniqueID).show();
+      cp5.getController("removeSegment"+mUniqueID).show();
+      if(b) {
+        cp5.getController("sliderTime"+mUniqueID).setVisible(true);
+        cp5.getController("removeSegment"+mUniqueID).setVisible(true);
+        cp5.getController("sliderTime"+mUniqueID).setPosition(mPosition.x+3,mPosition.y+mSize.y+4);
+        cp5.getController("removeSegment"+mUniqueID).setPosition(mPosition.x+mSize.x-16,mPosition.y+mSize.y+7);
+        pushMatrix();
+        translate(mPosition.x, mPosition.y+mSize.y);
+        pushStyle();
+        fill(farbe.white());
+        rect(0,0, constrain(mSize.x, 100, mSize.x), 23);
+        stroke(farbe.normal());
+        line(-1,-1,constrain(mSize.x, 100, mSize.x), -1);
+        popStyle();
+        popMatrix();
+      } else {
+        cp5.getController("sliderTime"+mUniqueID).setVisible(false);
+        cp5.getController("removeSegment"+mUniqueID).setVisible(false);
+      }
     } else {
-      cp5.getController("sliderTime"+mUniqueID).setVisible(false);
-      cp5.getController("removeSegment"+mUniqueID).setVisible(false);
+      cp5.getController("sliderTime"+mUniqueID).hide();
+      cp5.getController("removeSegment"+mUniqueID).hide();
     }
   }
 
   void updateTranslation() {
-    mPosition.y = mLayer.mTranslation.y+mMargin;
+    mPosition.y = mLayer.mTranslation.y+mLayer.mMargin;
     // cp5.getController("sliderTime"+mUniqueID).setPosition(mPosition.x+3,mPosition.y+mSize.y+4);
   }
 
   PVector getPosition() {
     return mPosition;
+  }
+
+  PVector getSize() {
+    return mSize;
   }
   
   void setPosition(PVector p) {
@@ -187,6 +214,10 @@ class Segment {
 
   int getID() {
     return mID;
+  }
+
+  float getDirection() {
+    return mTargetDirection;
   }
 
   float getTime() {
