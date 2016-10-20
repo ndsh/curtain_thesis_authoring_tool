@@ -3,14 +3,11 @@
 // for now we'll work with a fake pulse. later on there will be a RTC module
 // for the highest precision and timing
 
-#include <Wire.h>
-
 #include "src/Layer.h"
 #include <AccelStepper.h>
+#include <Servo.h>
 
-#define DS1307_ADRESSE 0x68 // I2C Addresse
-
-#include "inc/steppers.h"
+#include "inc/actuators.h"
 
 // temporary clock
 unsigned long gPreviousPulse = 0;  
@@ -40,6 +37,7 @@ void setup() {
     Serial.print("(APP) \t\t ");
     Serial.println("starting!");
 
+    // +++++++++++++++++++
     Serial.println("(APP) \t\t reading contents of settings.h...");
     int settings[] = {
       #include "inc/settings.h"
@@ -56,6 +54,7 @@ void setup() {
     layerList = new Layer[gTotalLayers];
     Serial.println("(APP) \t\t allocation complete");
 
+    // +++++++++++++++++++
     Serial.println("(APP) \t\t reading contents of layers.h...");
     int mSegmentAmounts[] = {
       #include "inc/layers.h"
@@ -63,6 +62,7 @@ void setup() {
     gSegmentAmounts = mSegmentAmounts;
     Serial.println("(APP) \t\t done");
 
+    // +++++++++++++++++++
     Serial.println("(APP) \t\t reading contents of segments.h...");
     int mCommands[][2] = {
       #include "inc/segments.h"
@@ -90,7 +90,6 @@ void setup() {
     }
 }
 void loop() {
-    RTCoutput();
     // Serial.println(gTotalLayers);
     // Serial.println(gTotalCountSegments);
     // Serial.println(gSegmentAmounts[0]);
@@ -103,33 +102,6 @@ void loop() {
         gPreviousPulse = tCurrentMillis;
         for(uint8_t i = 0; i<gTotalLayers; i++) {
             layerList[i].update();
-        }
-        
-    }
-
-
- 
-  
-}
-
-byte bcdToDec(byte val) {
-  return ((val/16*10) + (val - 16 * (val / 16)));
-}
-
-void RTCoutput(){
-  // initialize and point at head
-  // read/write is normal since Wire 1.0
-    Wire.beginTransmission(DS1307_ADRESSE);
-    Wire.write(0x00);
-    Wire.endTransmission();
-   
-    Wire.requestFrom(DS1307_ADRESSE, 7);
-   
-    mSecond = bcdToDec(Wire.read());
-    // mMinute = bcdToDec(Wire.read());
-    // mHour = bcdToDec(Wire.read() & 0b111111);
-    // mWeekday = bcdToDec(Wire.read());
-    // mDay = bcdToDec(Wire.read());
-    // mMonth = bcdToDec(Wire.read());
-    // mYear = bcdToDec(Wire.read());
+        }   
+    } 
 }

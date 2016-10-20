@@ -18,6 +18,8 @@ class Layer
 
   private:
   	int mID;
+    int mMotorID; // for the respective array
+    int mMotorType; // 0 = stepper; 1 = servo
   	int** mCommands;
   	int mSegments; // how many segments are in this layer
   	int mCurrentSegment; // our pointer, which current segment

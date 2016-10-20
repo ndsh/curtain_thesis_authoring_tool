@@ -8,6 +8,10 @@ Layer::Layer() {
 void Layer::setup(int tID, int tSegments) {
 	// topkeksetup()
 	mID = tID;
+	mMotorID = 0;
+	// what is this object? stepper or servo?
+	// what's the id? there can be actually
+	// two Layers 
 	if(mID == 0) {
 		steppers[0]->setEnablePin(13);
 	   	steppers[0]->setMaxSpeed(500*32); // maxSpeed higher than 1000 might be unreliable
