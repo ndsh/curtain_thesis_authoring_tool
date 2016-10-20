@@ -12,7 +12,6 @@
 // temporary clock
 unsigned long gPreviousPulse = 0;  
 unsigned long gPulseInterval = 0;
-long mSeconds = 0;
 
 Layer* layerList;
 int gTotalLayers;
@@ -20,19 +19,13 @@ int* gSegmentAmounts;
 int **gCommands;
 int gTotalCountSegments = 0;
 
-int mSecond, mPreviousSecond
-//mMinute, mHour, mDay, mWeekday, mMonth, mYear;
-int mCurrentSeconds = 0;
+bool mIsPlaying = false;
+bool mAllLayersFinished = false;
 
 
 void setup() {  
 
     // Serial.begin(9600);
-    Wire.begin();
-    RTCoutput();
-    Serial.print(mHour);
-    Serial.print(":");
-    Serial.println(mMinute);  
 
     Serial.print("(APP) \t\t ");
     Serial.println("starting!");
@@ -86,19 +79,28 @@ void setup() {
 
     Serial.println("(APP) \t\t creating objects...");
     for(uint8_t i = 0; i<gTotalLayers; i++) {
-        layerList[i].setup(i, gSegmentAmounts[i]);
+        layerList[i].setup(i, gSegmentAmounts[i], 987);
+        // 987 = motor type
+    }
+
+    for(uint8_t i = 0; i<gTotalLayers; i++) {
+        layerList[i].start();
     }
 }
 void loop() {
+
+    // check for input
+
+
     // Serial.println(gTotalLayers);
     // Serial.println(gTotalCountSegments);
     // Serial.println(gSegmentAmounts[0]);
     // Serial.println(gCommands[0][0]);
+
     unsigned long tCurrentMillis = millis();
     if(tCurrentMillis - gPreviousPulse > gPulseInterval) {
         // Serial.print("tick: ");
         // Serial.println(mSeconds);
-        mSeconds++;
         gPreviousPulse = tCurrentMillis;
         for(uint8_t i = 0; i<gTotalLayers; i++) {
             layerList[i].update();

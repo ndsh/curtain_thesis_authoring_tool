@@ -13,10 +13,14 @@ class Layer
 {
   public:
   	Layer();
-  	void setup(int tID, int tSegments);
+  	void setup(int tID, int tSegments, int tTypes);
     void update();
+    void start();
+    void reset();
 
   private:
+    long mLastMillis;
+    long mSegmentTime;
   	int mID;
     int mMotorID; // for the respective array
     int mMotorType; // 0 = stepper; 1 = servo
@@ -25,6 +29,7 @@ class Layer
   	int mCurrentSegment; // our pointer, which current segment
   	int mCurrentRuntime; // how long this segment runs, in ms
   	int mCurrentSteps;
+    bool mFinished;
 };
 
 #endif

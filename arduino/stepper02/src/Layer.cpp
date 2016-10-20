@@ -5,15 +5,17 @@ Layer::Layer() {
 	// to init this the c++ way
 }
 
-void Layer::setup(int tID, int tSegments) {
+void Layer::setup(int tID, int tSegments, int tType) {
+	mFinished = false;
 	// topkeksetup()
 	mID = tID;
 	mMotorID = 0;
+	mMotorType = tType;
 	// what is this object? stepper or servo?
 	// what's the id? there can be actually
 	// two Layers 
 	if(mID == 0) {
-		steppers[0]->setEnablePin(13);
+		steppers[0]->setEnablePin(42);
 	   	steppers[0]->setMaxSpeed(500*32); // maxSpeed higher than 1000 might be unreliable
 	   	// steppers[0]->setSpeed(200*32);
 	   
@@ -62,26 +64,16 @@ void Layer::setup(int tID, int tSegments) {
 	// Serial.println(millis());
 	// Serial.println(millis());
 	mCurrentRuntime = (mCommands[mCurrentSegment][0])*1000;
+	mCurrentSteps = mCommands[mCurrentSegment][1];
 }
 
 void Layer::update() {
 	int microStepping = 32;
-	int newSpeed = 200;
-	
-
 	if(mID == 0) {
 		steppers[0]->setSpeed((mCurrentSteps*microStepping));
-    	steppers[0]->runSpeed();
-	// Serial.print("(LAYER) \t current segment in ");
-	// Serial.print(mID);
-	// Serial.print(" is ");
-	// Serial.print(mCurrentSegment);
-	// Serial.print(" with a runtime of ");
-	// Serial.print(mCurrentRuntime);
-	// Serial.println(" milliseconds");
+		steppers[0]->runSpeed();
 	}
-	if(mCurrentRuntime > 0) mCurrentRuntime--;
-	if(mCurrentRuntime <= 0 && mCurrentSegment < mSegments) {
+    if (millis() - mLastMillis > mCurrentRuntime) {
 		mCurrentSegment++;
 		mCurrentRuntime = (mCommands[mCurrentSegment][0])*1000;
 		mCurrentSteps = mCommands[mCurrentSegment][1];
@@ -92,6 +84,21 @@ void Layer::update() {
 	  	Serial.print(" - new speed: ");
 	  	Serial.println(mCurrentSteps);
 		if(mID == 0) steppers[0]->setSpeed((mCurrentSteps*microStepping));
-	}
+		mLastMillis = millis();
+    }
+	// Serial.print("(LAYER) \t current segment in ");
+	// Serial.print(mID);
+	// Serial.print(" is ");
+	// Serial.print(mCurrentSegment);
+	// Serial.print(" with a runtime of ");
+	// Serial.print(mCurrentRuntime);
+	// Serial.println(" milliseconds");
+}
 
+void Layer::start() {
+	mLastMillis = millis();
+}
+
+void Layer::reset() {
+	mCurrentSegment = 0;
 }
