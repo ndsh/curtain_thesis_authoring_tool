@@ -1,3 +1,12 @@
 /.DS_Store
 .DS_Store
 /tool/build-tmp
+/arduino/stepper02/inc/actuators_attach.h
+/arduino/stepper02/inc/actuators_setup.h
+/arduino/stepper02/inc/extrapin.h
+/arduino/stepper02/inc/identification.h
+/arduino/stepper02/inc/layers.h
+/arduino/stepper02/inc/segments.h
+/arduino/stepper02/inc/settings.h
+/arduino/stepper02/inc/steppers.h
+/arduino/stepper02/inc/types.h
