@@ -10,40 +10,12 @@
 // 28160 usteps (or 880)
 
 #include <AccelStepper.h>
-/* m1
-int enablePin = 14;
-int modePin = 15;
-int pinStep = 16;
-int pinDirection = 17;
+/*
+int enablePin;
+int modePin;
+int pinStep;
+int pinDirection;
 */
-
-/* m2
-int enablePin = 18;
-int modePin = 19;
-int pinStep = 20;
-int pinDirection = 21;
-*/
-
-/* m3
-int enablePin = 22;
-int modePin = 24;
-int pinStep = 26;
-int pinDirection = 28;
-*/
-
-/* m4
-int enablePin = 30;
-int modePin = 32;
-int pinStep = 34;
-int pinDirection = 36;
-*/
-
-int enablePin = 42;
-int modePin = 44;
-int pinStep = 46;
-int pinDirection = 48;
-
-
 bool steppingMode = true; // true = 32, false = half step
 
 int microStepping;
@@ -62,10 +34,29 @@ boolean reverse = false; // write here either 'true' or 'false'
 //********/*
 
 
+
+
+int selection = 1; // 1-5 ->(n-1)
+
+
+int selectedMotor[5][4] = {
+    {14,  15,  16, 17},
+    {18,  19,  20, 21},
+    {22,  24, 26, 28},
+    {30,  32, 32, 36},    
+    {42,  44, 46, 48}
+ };
+int enablePin = selectedMotor[selection][0];
+int modePin = selectedMotor[selection][1];
+int pinStep = selectedMotor[selection][2];
+int pinDirection = selectedMotor[selection][3];
 AccelStepper stepper(1, pinStep, pinDirection); // Defaults to AccelStepper::FULL4WIRE (4 pins) on 2, 3, 4, 5
 
 void setup()
 {
+  //selection--;
+  
+
   pinMode(modePin, OUTPUT);
   digitalWrite(modePin, steppingMode);
   Serial.begin(9600);
