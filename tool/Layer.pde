@@ -108,6 +108,7 @@ class Layer {
      // .setPosition(-2,0)
      .setSize(20,20)
      .setValue(true)
+     .setCaptionLabel("")
      // .setMode(ControlP5.SWITCH)
      .setColorForeground(farbe.white())
     .setColorBackground(farbe.light())
