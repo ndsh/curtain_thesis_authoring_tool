@@ -7,7 +7,7 @@ class Layer {
   PVector mSize;
   PVector mTranslation;
   int mSegmentCounter;
-  String[] mLayerMode = {"Curtain: Up+Down", "Curtain: Left+Right", "Servo"};
+  String[] mLayerMode = {"Curtain: Up+Down", "Curtain: Left+Right", "Servo", "DC Fan"};
   String[] mNumber;
   boolean mQueued = false;
   boolean mSegmentQueue = false;
@@ -25,11 +25,14 @@ class Layer {
   Textlabel mLabelStep;
   Textlabel mLabelDir;
   Textlabel mLabelEnable;
+  Textlabel mLabelStepperMode;
+  Textlabel mLabelSegments;
   int mMotorMode;
   int mMotorNumber;
   int mPinStep;
   int mPinDir;
   int mPinEnable;
+  int mPinStepperMode;
 
   Layer() {
     this(mLayerCounter);
@@ -66,6 +69,8 @@ class Layer {
           mMotorNumber = (int)theEvent.getController().getValue();
         } else if (theEvent.getController().getName().equals("layerStepDD"+mID)) {
           mPinStep = (int)theEvent.getController().getValue();
+        } else if (theEvent.getController().getName().equals("layerStepperModeDD"+mID)) {
+          mPinStepperMode = (int)theEvent.getController().getValue();
         } else if (theEvent.getController().getName().equals("layerDirDD"+mID)) {
           mPinDir = (int)theEvent.getController().getValue();
         } else if (theEvent.getController().getName().equals("layerEnableDD"+mID)) {
@@ -102,7 +107,7 @@ class Layer {
       ;
     cp5.addScrollableList("layerNumber"+mID)
       .setPosition((mTranslation.x)+215, mLayerControls)
-      .setSize(30, 70)
+      .setSize(30, 150)
       .setBarHeight(20)
       .setItemHeight(20)
       .addItems(mLayersNumber)
@@ -116,14 +121,56 @@ class Layer {
       .setColorCaptionLabel(farbe.normal())
       .setColorValueLabel(farbe.normal())
       ;
-    mLabelStep = cp5.addTextlabel("labelStep"+mID)
-      .setText("STEP")
+    mLabelEnable = cp5.addTextlabel("labelEnable"+mID)
+      .setText("ENABLE")
       .setPosition(mTranslation.x+265, mLayerControls+4)
       .setColorValue(farbe.white())
       ;
+    cp5.addScrollableList("layerEnableDD"+mID)
+      .setPosition((mTranslation.x)+310, mLayerControls)
+      .setSize(30, 150)
+      .setBarHeight(20)
+      .setItemHeight(20)
+      .addItems(mNumber)
+      .setType(ScrollableList.DROPDOWN) // currently supported DROPDOWN and LIST
+      .addCallback(cb)
+      .setCaptionLabel("-")
+      .setOpen(false)
+      .setColorForeground(farbe.white())
+      .setColorBackground(farbe.light())
+      .setColorActive(farbe.light())
+      .setColorCaptionLabel(farbe.normal())
+      .setColorValueLabel(farbe.normal())
+      ;
+    mLabelStepperMode = cp5.addTextlabel("labelStepperMode"+mID)
+      .setText("M2")
+      .setPosition(mTranslation.x+350, mLayerControls+4)
+      .setColorValue(farbe.white())
+      ;
+    cp5.addScrollableList("layerStepperModeDD"+mID)
+      .setPosition((mTranslation.x)+375, mLayerControls)
+      .setSize(30, 150)
+      .setBarHeight(20)
+      .setItemHeight(20)
+      .addItems(mNumber)
+      .setType(ScrollableList.DROPDOWN) // currently supported DROPDOWN and LIST
+      .addCallback(cb)
+      .setCaptionLabel("-")
+      .setOpen(false)
+      .setColorForeground(farbe.white())
+      .setColorBackground(farbe.light())
+      .setColorActive(farbe.light())
+      .setColorCaptionLabel(farbe.normal())
+      .setColorValueLabel(farbe.normal())
+      ;
+    mLabelStep = cp5.addTextlabel("labelStep"+mID)
+      .setText("STEP")
+      .setPosition(mTranslation.x+410, mLayerControls+4)
+      .setColorValue(farbe.white())
+      ;
     cp5.addScrollableList("layerStepDD"+mID)
-      .setPosition((mTranslation.x)+300, mLayerControls)
-      .setSize(30, 70)
+      .setPosition((mTranslation.x)+440, mLayerControls)
+      .setSize(30, 150)
       .setBarHeight(20)
       .setItemHeight(20)
       .addItems(mNumber)
@@ -139,12 +186,12 @@ class Layer {
       ;
     mLabelDir = cp5.addTextlabel("labelDir"+mID)
       .setText("DIR")
-      .setPosition(mTranslation.x+340, mLayerControls+4)
+      .setPosition(mTranslation.x+480, mLayerControls+4)
       .setColorValue(farbe.white())
       ;
     cp5.addScrollableList("layerDirDD"+mID)
-      .setPosition((mTranslation.x)+365, mLayerControls)
-      .setSize(30, 70)
+      .setPosition((mTranslation.x)+500, mLayerControls)
+      .setSize(30, 150)
       .setBarHeight(20)
       .setItemHeight(20)
       .addItems(mNumber)
@@ -158,34 +205,14 @@ class Layer {
       .setColorCaptionLabel(farbe.normal())
       .setColorValueLabel(farbe.normal())
       ;
-    mLabelEnable = cp5.addTextlabel("labelEnable"+mID)
-      .setText("ENABLE")
-      .setPosition(mTranslation.x+400, mLayerControls+4)
-      .setColorValue(farbe.white())
-      ;
-    cp5.addScrollableList("layerEnableDD"+mID)
-      .setPosition((mTranslation.x)+445, mLayerControls)
-      .setSize(30, 70)
-      .setBarHeight(20)
-      .setItemHeight(20)
-      .addItems(mNumber)
-      .setType(ScrollableList.DROPDOWN) // currently supported DROPDOWN and LIST
-      .addCallback(cb)
-      .setCaptionLabel("-")
-      .setOpen(false)
-      .setColorForeground(farbe.white())
-      .setColorBackground(farbe.light())
-      .setColorActive(farbe.light())
-      .setColorCaptionLabel(farbe.normal())
-      .setColorValueLabel(farbe.normal())
-      ;
-    mLabelEnable = cp5.addTextlabel("labelSegments"+mID)
+    
+    mLabelSegments = cp5.addTextlabel("labelSegments"+mID)
       .setText("SEGMENTS")
-      .setPosition(mTranslation.x+500, mLayerControls+4)
+      .setPosition(mTranslation.x+550, mLayerControls+4)
       .setColorValue(farbe.white())
       ;
     cp5.addButton("addSegment"+mID)
-      .setPosition((mTranslation.x)+560, mLayerControls)
+      .setPosition((mTranslation.x)+610, mLayerControls)
       .setSize(20,20)
       .setCaptionLabel("+")
       .addCallback(cb)
@@ -279,7 +306,11 @@ class Layer {
   }
 
   int getMotorMode() {
-    return mMotorMode;
+    int type = 0;
+    if(mMotorMode == 0 || mMotorMode == 1) type = 0;
+    else if(mMotorMode == 2) type = 1;
+    else if(mMotorMode == 3) type = 2;
+    return type;
   }
 
   int getMotorNumber() {
@@ -297,6 +328,11 @@ class Layer {
   int getPinEnable() {
     return mPinEnable;
   }
+
+  int getStepperMode() {
+    return mPinStepperMode;  
+  }
+  
 
   void update(){
     for (Segment segment : segments) {
@@ -353,18 +389,29 @@ class Layer {
     mTranslation = new PVector(leftMargin, (header.getHeight()+mSize.y/2+((getPosition()))*mSize.y)+(mSize.y/1.2*getPosition()));
     mLayerControls = mTranslation.y+mSize.y+3; // does not work. have to update all controls one by one
     // cp5.getController("sliderTime"+mUniqueID).setPosition(mPosition.x+3,mPosition.y+mSize.y+4);
-    cp5.getController("layerEnableDD"+mID).setPosition((mTranslation.x)+445, mLayerControls);
-    cp5.getController("labelEnable"+mID).setPosition(mTranslation.x+400, mLayerControls+4);
-    cp5.getController("layerDirDD"+mID).setPosition((mTranslation.x)+365, mLayerControls);
-    cp5.getController("labelDir"+mID).setPosition(mTranslation.x+340, mLayerControls+4);
-    cp5.getController("layerStepDD"+mID).setPosition((mTranslation.x)+300, mLayerControls);
-    cp5.getController("labelStep"+mID).setPosition(mTranslation.x+265, mLayerControls+4);
+
+    cp5.getController("layerMode"+mID).setPosition(mTranslation.x-1, mLayerControls);    
+
+    cp5.getController("labelEnable"+mID).setPosition(mTranslation.x+265, mLayerControls+4);
+    cp5.getController("layerEnableDD"+mID).setPosition((mTranslation.x)+310, mLayerControls);
+    
+
+    cp5.getController("layerStepperModeDD"+mID).setPosition((mTranslation.x)+375, mLayerControls);
+    cp5.getController("labelStepperMode"+mID).setPosition(mTranslation.x+350, mLayerControls+4);
+
+    cp5.getController("layerStepDD"+mID).setPosition((mTranslation.x)+440, mLayerControls);
+    cp5.getController("labelStep"+mID).setPosition(mTranslation.x+410, mLayerControls+4);
+
+    cp5.getController("layerDirDD"+mID).setPosition((mTranslation.x)+500, mLayerControls);
+    cp5.getController("labelDir"+mID).setPosition(mTranslation.x+480, mLayerControls+4);
+    
     cp5.getController("layerNumber"+mID).setPosition((mTranslation.x)+215, mLayerControls);
     cp5.getController("labelNumber"+mID).setPosition(mTranslation.x+200, mLayerControls+4);
-    cp5.getController("layerMode"+mID).setPosition(mTranslation.x-1, mLayerControls);    
-    cp5.getController("layerEnableDD"+mID).setPosition((mTranslation.x)+445, mLayerControls);
-    cp5.getController("labelSegments"+mID).setPosition(mTranslation.x+500, mLayerControls+4);
-    cp5.getController("addSegment"+mID).setPosition((mTranslation.x)+560, mLayerControls);
+    
+    
+
+    cp5.getController("labelSegments"+mID).setPosition(mTranslation.x+550, mLayerControls+4);
+    cp5.getController("addSegment"+mID).setPosition((mTranslation.x)+610, mLayerControls);
     for (Segment segment : segments) {
       segment.updateTranslation();
     } 
@@ -381,6 +428,8 @@ class Layer {
   ArrayList<PVector> getPVectors() {
     ArrayList<PVector> dots = new ArrayList<PVector>();
     for (Segment segment : segments) {
+      // PVector v = new PVector(segment.getPosition().x, segment.getWidth());
+      // println(v);
       PVector v = segment.getPosition();
       dots.add(v);
     }
@@ -404,7 +453,8 @@ class Layer {
     for (PVector sortedSegment : tSegments) {
       for (Segment segment : segments) {
         if(segment.getPosition() == sortedSegment) {
-          PVector v = new PVector(segment.getPosition().x, segment.getPosition().y, segment.getID());
+          // PVector v = new PVector(segment.getPosition().x, segment.getPosition().y, segment.getID());
+          PVector v = new PVector(segment.getPosition().x, segment.getWidth(), segment.getID());
           withID.add(v);
           break;
         }
@@ -414,7 +464,9 @@ class Layer {
   }
 
   ArrayList<PVector> getNullSegments() {
+
     ArrayList<PVector> withID = getSegmentsWithID();
+    // println("sorteds: "+withID);
     // walk through our new vectors
     // look up the width
     // and try to calculate the white spaces
@@ -430,17 +482,28 @@ class Layer {
 
       // println(sortedSegment.x-leftBorder);
       // there is something left from us
-      if(sortedSegment.x-leftBorder > 0) {
+      
+      if(sortedSegment.x-leftBorder > leftMargin) {
+        // println(counter + " :: "+ (sortedSegment.x-leftBorder) + " is ok");
         PVector v = new PVector(leftBorder, (sortedSegment.x-leftBorder), -1);
         nullSegments.add(v);
-        leftBorder = (segments.get((int)sortedSegment.z).getWidth())+sortedSegment.x;
+        
       }
-      counter++;
+      // leftBorder = sortedSegment.x+(segments.get((int)sortedSegment.z).getWidth());
+      leftBorder = sortedSegment.x+sortedSegment.y;
+      
       // when we encounter our last element
-      if(counter == withID.size() && maxWidth-leftBorder > 0) {
-          PVector v = new PVector(leftBorder, (maxWidth-leftBorder)+leftMargin, -1);
+      // not right yet!?!?!?!?!?!?!?!
+      // not right yet!?!?!?!?!?!?!?!
+      // not right yet!?!?!?!?!?!?!?!
+      // not right yet!?!?!?!?!?!?!?!
+      // not right yet!?!?!?!?!?!?!?!
+      if((counter+1) == withID.size() && maxWidth-(leftBorder-leftMargin) > 0) {
+        // println("last element: "+ (maxWidth-(leftBorder-leftMargin)));
+          PVector v = new PVector(leftBorder, maxWidth-(leftBorder-leftMargin), -1);
           nullSegments.add(v);
       }
+      counter++;
     }
     return nullSegments;
   }

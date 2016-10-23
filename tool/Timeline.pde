@@ -191,8 +191,12 @@ class Timeline {
 
       // REMOVE ME!!!
       // if(layer.getID() == 1) {
-        // println(layer.sortSegments());
-        // println(layer.getNullSegments());
+        if(layer.getID() == 0) {
+          // println("max:" + maxWidth);
+          // println("sorteds: "+layer.sortSegments());
+          // println("nulls: "+ layer.getNullSegments());
+          
+       } 
         tReturn.add(layer.sortSegments(layer.mergeLists(layer.getSegmentsWithID(), layer.getNullSegments())));
       // }
       

@@ -115,6 +115,17 @@ class Header {
 			fill(farbe.white());
 			noStroke();
 			rect(0, 0, mDimensions.x, mDimensions.y);
+			stroke(farbe.normal());
+			line(leftMargin, mOrigin.y+(mDimensions.y-5), maxWidth, mOrigin.y+(mDimensions.y-5));
+			int tGrid = 16;
+			int tDivider = (int) (maxWidth/tGrid);
+			fill(0,0,0);
+			textAlign(LEFT);
+			for(int i = 0; i<tGrid; i++) {
+				int h = (int)(map(i, 0, tGrid-1, 0, mTotalPlayTime));
+				text(h/60+":"+h%60, i*tDivider+(leftMargin), mOrigin.y+(mDimensions.y-10));
+				line(i*tDivider+(leftMargin),mOrigin.y+(mDimensions.y-10),i*tDivider+(leftMargin),mOrigin.y+(mDimensions.y));
+			}
 			popStyle();
 			popMatrix();
 		} else {
@@ -167,20 +178,37 @@ class Header {
 	}
 
 	void loadTimeline() {
-		JSONObject json;
-		json = loadJSONObject("new.json");
-		
-		JSONArray layerData = json.getJSONArray("layers");
-		println(layerData.getJSONObject(0).getJSONObject("segment"));
-		println(layerData.getJSONObject(0).getJSONObject("segment").getFloat("direction"));
-		println(layerData.getJSONObject(0).getInt("id"));
-		timeline.add(layerData.getJSONObject(0).getInt("id"));
-		Layer layer = timeline.getLayer(layerData.getJSONObject(0).getInt("id"));
-		layer.add(
-			layerData.getJSONObject(0).getJSONObject("segment").getFloat("direction"), 
-			new PVector(layerData.getJSONObject(0).getJSONObject("segment").getFloat("positionX"),	layerData.getJSONObject(0).getJSONObject("segment").getFloat("positionY")),
-			new PVector(layerData.getJSONObject(0).getJSONObject("segment").getFloat("sizeX"),	layerData.getJSONObject(0).getJSONObject("segment").getFloat("sizeY"))
-		);
+		try {
+			JSONObject json = loadJSONObject("new.json");
+			// for(int i = 0; i<json.size(); i++) {
+			
+				JSONArray layerData = json.getJSONArray("layers");
+				for(int i = 0; i<layerData.size(); i++) {
+					println("layer"+i);
+					int layerID = layerData.getJSONObject(i).getInt("id");
+					timeline.add(layerID);
+					Layer layer = timeline.getLayer(layerID);
+
+					for(int j = 0; j<(layerData.getJSONObject(i).size()-1); j++) {
+						layer.add(
+							layerData.getJSONObject(i).getJSONObject("segment"+j).getFloat("direction"), 
+							new PVector(layerData.getJSONObject(i).getJSONObject("segment"+j).getFloat("positionX"),	layerData.getJSONObject(i).getJSONObject("segment"+j).getFloat("positionY")),
+							new PVector(layerData.getJSONObject(i).getJSONObject("segment"+j).getFloat("sizeX"),	layerData.getJSONObject(i).getJSONObject("segment"+j).getFloat("sizeY"))
+						);
+					}
+					// println(layerData.getJSONObject(i).getJSONObject("segment"+j));
+					// println(layerData.getJSONObject(i).getJSONObject("segment"+j).getFloat("direction"));
+					// println(layerData.getJSONObject(i).getInt("id"));
+					
+					
+					
+				}
+			// }
+		}
+		catch(Exception e){
+		   // e.printStackTrace();
+		   //json was blank, do something else
+		}
 	}
 
 	void loadSettings() {
@@ -197,6 +225,7 @@ class Header {
 		for(Layer layer : timeline.getLayers()) {
 			JSONObject layerData = new JSONObject();
 			layerData.setInt("id", layer.getID());
+			int j = 0;
 			for(Segment segment : layer.getSegments()) {
 				JSONObject segmentData = new JSONObject();
 				segmentData.setInt("id", segment.getID());
@@ -205,12 +234,19 @@ class Header {
 				segmentData.setFloat("positionY", segment.getPosition().y);
 				segmentData.setFloat("sizeX", segment.getSize().x);
 				segmentData.setFloat("sizeY", segment.getSize().y);
-				layerData.setJSONObject("segment", segmentData);
+				layerData.setJSONObject("segment"+j, segmentData);
+				
+				j++;
 			}
 			values.setJSONObject(i, layerData);
+			
+			
+			
+			
 			i++;
 		}
 		json.setJSONArray("layers", values);
+		
 	  	saveJSONObject(json, "data/new.json");
 
 	    cp5.saveProperties();
@@ -237,9 +273,9 @@ class Header {
   		println("### (HEADER) done!");
 
 		// ++++++++++++++++++++++++++++++++++++++++++
-		// actuators.h
-		output = createWriter(mArduinoPath+"actuators.h");
-		output.println("// actuators.h");
+		// actuators_setup.h
+		output = createWriter(mArduinoPath+"actuators_setup.h");
+		output.println("// actuators_setup.h");
 		output.println("// setup objects for actuators array");
 		output.println("// holds information for all pins");
 		// example:
@@ -256,7 +292,7 @@ class Header {
 		//
 		counter = 0;
 		for (Layer layer : timeline.getLayers()) {
-			if(layer.getMotorMode() != 2) {
+			if(layer.getMotorMode() == 0) {
 				output.println("AccelStepper stepper"+ counter +"(1, "+layer.getPinStep()+", "+layer.getPinDir()+");");
 				counter++;
 			}
@@ -268,7 +304,7 @@ class Header {
 
 			counter = 0;
 			for (Layer layer : timeline.getLayers()) {
-				if(layer.getMotorMode() != 2) {
+				if(layer.getMotorMode() == 0) {
 					output.print("&stepper"+ counter);
 					counter++;
 					if(counter != tSteppers) output.print(", ");
@@ -279,7 +315,7 @@ class Header {
 
 		counter = 0;
 		for (Layer layer : timeline.getLayers()) {
-			if(layer.getMotorMode() == 2) {
+			if(layer.getMotorMode() == 1) {
 				counter++;
 			}
 		}
@@ -287,12 +323,39 @@ class Header {
 		if(tServos > 0) {
 			output.println("");
 			output.println("Servo servos["+tServos+"];");
-			counter = 0;
-			for (Layer layer : timeline.getLayers()) {
-				if(layer.getMotorMode() == 2) {
-					output.println("servos["+counter+"].attach("+layer.getPinEnable()+");");
-					counter++;
-				}
+		}
+
+		
+		output.flush();
+  		output.close();
+  		println("");
+  		println("### (HEADER) done!");
+
+  		// ++++++++++++++++++++++++++++++++++++++++++
+		// actuators_attach.h
+		output = createWriter(mArduinoPath+"actuators_attach.h");
+		output.println("// actuators_attach.h");
+		output.println("// attach actuators to pins");
+
+		counter = 0;
+		for (Layer layer : timeline.getLayers()) {
+			if(layer.getMotorMode() == 0) {
+				output.println("steppers["+counter+"]->setEnablePin("+ layer.getPinEnable() +");");
+				counter++;
+			}
+		}
+		counter = 0;
+		for (Layer layer : timeline.getLayers()) {
+			if(layer.getMotorMode() == 1) {
+				output.println("servos["+counter+"].attach("+layer.getPinEnable()+");");
+				counter++;
+			}
+		}
+		counter = 0;
+		for (Layer layer : timeline.getLayers()) {
+			if(layer.getMotorMode() == 2) {
+				output.println("pinMode("+layer.getPinEnable()+", OUTPUT);");
+				counter++;
 			}
 		}
 
@@ -310,10 +373,23 @@ class Header {
 		output.println("// how many segments per layer");
 		output.println("// ordered by layer sequence");
 		counter = 0;
-		for (Layer layer : timeline.getLayers()) {
-			print(".");
-			output.print(layer.countSegments());
-			counter++;
+
+		// ! was only counting filled segments !
+
+		// for (Layer layer : timeline.getLayers()) {
+		// 	print(".");
+		// 	output.print(layer.countSegments());
+		// 	counter++;
+		// 	if(counter != timeline.countLayers()) output.println(",");
+		// }
+
+		counter = 0;
+		for ( ArrayList<PVector> u : timeline.getExport()) {
+			int j = 0;
+			for ( PVector o : u) {
+				j++;
+			}
+			output.print(j);
 			if(counter != timeline.countLayers()) output.println(",");
 		}
 		output.flush();
@@ -330,6 +406,10 @@ class Header {
 		output.println("// ordered by layer sequence");
 		counter = 0;
 		for (Layer layer : timeline.getLayers()) {
+			int type=0;
+			// if(layer.getMotorMode() == 0) type = 0;
+			// else if(layer.getMotorMode() == 1) type = 1;
+			// else if(layer.getMotorMode() == 2) type = 2;
 			output.print(layer.getMotorMode());
 			counter++;
 			if(counter != timeline.countLayers()) output.println(",");
@@ -358,6 +438,29 @@ class Header {
   		println("### (HEADER) done!");
 
   		// ++++++++++++++++++++++++++++++++++++++++++
+		// extrapin.h
+		print("### (HEADER) creating extrapin.h");
+		output = createWriter(mArduinoPath+"extrapin.h");
+		output.println("// extrapin.h");
+		output.println("// for DC and steppers we need extra pin configurations");
+		output.println("// stepper = M2 pin / DC = control pin");
+		counter = 0;
+		for (Layer layer : timeline.getLayers()) {
+			if(layer.getMotorMode() == 0) {
+				output.println(layer.getStepperMode() +",");
+			} else if(layer.getMotorMode() == 2) {
+				output.println(layer.getPinEnable() +",");
+			} else output.println("-1,");
+			
+			counter++;
+			// if(counter != timeline.countLayers()) output.println(",");
+		}
+		output.flush();
+  		output.close();
+  		println("");
+  		println("### (HEADER) done!");
+
+  		// ++++++++++++++++++++++++++++++++++++++++++
 		// segments.h
 		// tupels of commands
 		// ordered by layer sequence
@@ -368,13 +471,18 @@ class Header {
 		output.println("// ordered by layer sequence");
 		output.println("// time in seconds, steps per second");
 		counter = 0;
+		int previousValue = 0;
 		for ( ArrayList<PVector> u : timeline.getExport()) {
 			output.println("// LAYER "+counter);
-			for ( PVector o : u) {
+			println("// LAYER "+counter);
 
+			for ( PVector o : u) {
+				println(o.x + "\t" + o.y + "\t" + o.z);
 				if(o.z != -1) { 
 					Segment s = timeline.getLayers().get(counter).getSegments().get((int)o.z);
-					output.println("{"+(int)s.getTime()+","+s.getSteps()+"},");
+					if( timeline.getLayers().get(counter).getMotorMode() == 0) output.println("{"+(int)s.getTime()+","+s.getSteps()+"},");
+					else output.println("{"+(int)s.getTime()+","+(int)s.getDirection()+"},");
+					previousValue = s.getSteps();
 					//  {
 					//   5, 20
 					// },
@@ -383,8 +491,15 @@ class Header {
 					
 				} else {
 					//map(mSize.x, mGrabArea, width-30, 0, mTotalPlayTime)
-					// println(o.y);
-					output.println("{"+(int)map(o.y, 0, maxWidth, 0, mTotalPlayTime)+",0},");
+					
+
+					// ???? FIX ****
+
+					if(timeline.getLayers().get(counter).getMotorMode() == 0 || timeline.getLayers().get(counter).getMotorMode() == 2) {
+						output.println("{"+(int)map(o.y, 0, maxWidth, 0, mTotalPlayTime)+",0},");
+					} else if(timeline.getLayers().get(counter).getMotorMode() == 1) {
+						output.println("{"+(int)map(o.y, 0, maxWidth, 0, mTotalPlayTime)+","+previousValue+"},");
+					}
 					// println(map(o.y, mGrabArea, width-30, 0, mTotalPlayTime));
 				}
 			}
@@ -395,6 +510,4 @@ class Header {
   		println("");
   		println("### (HEADER) done!");
 	}
-
-
 }

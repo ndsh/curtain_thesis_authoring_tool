@@ -97,6 +97,8 @@ void setup() {
 
   String tLines[] = loadStrings("data/settings/settings.cfg");
   if(tLines.length > 0) if(tLines[0].length() > 0) mArduinoPath = tLines[0]+"/";
+
+  timeline.getExport();
 }
 
 void draw() {
