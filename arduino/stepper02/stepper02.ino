@@ -7,7 +7,7 @@
 #include <AccelStepper.h>
 #include <Servo.h>
 
-#include "inc/actuators.h"
+#include "inc/actuators_setup.h"
 
 // temporary clock
 unsigned long gPreviousPulse = 0;  
@@ -17,6 +17,9 @@ Layer* layerList;
 int gTotalLayers;
 int* gSegmentAmounts;
 int **gCommands;
+int* gIdentification;
+int* gExtraPin;
+int* gTypes;
 int gTotalCountSegments = 0;
 
 bool mIsPlaying = false;
@@ -31,7 +34,7 @@ void setup() {
     Serial.println("starting!");
 
     // +++++++++++++++++++
-    Serial.println("(APP) \t\t reading contents of settings.h...");
+    Serial.print("(APP) \t\t reading contents of settings.h...");
     int settings[] = {
       #include "inc/settings.h"
     };
@@ -56,7 +59,31 @@ void setup() {
     Serial.println("(APP) \t\t done");
 
     // +++++++++++++++++++
-    Serial.println("(APP) \t\t reading contents of segments.h...");
+    Serial.print("(APP) \t\t reading contents of identification.h...");
+    int mIdentification[] = {
+      #include "inc/identification.h"
+    };
+    gIdentification = mIdentification;
+    Serial.println("(APP) \t\t done");
+
+    // +++++++++++++++++++
+    Serial.print("(APP) \t\t reading contents of extrapin.h...");
+    int mExtraPin[] = {
+      #include "inc/extrapin.h"
+    };
+    gExtraPin = mExtraPin;
+    Serial.println("(APP) \t\t done");
+
+    // +++++++++++++++++++
+    Serial.print("(APP) \t\t reading contents of types.h...");
+    int mTypes[] = {
+      #include "inc/types.h"
+    };
+    gTypes = mTypes;
+    Serial.println("(APP) \t\t done");
+
+    // +++++++++++++++++++
+    Serial.print("(APP) \t\t reading contents of segments.h...");
     int mCommands[][2] = {
       #include "inc/segments.h"
     };
@@ -65,9 +92,9 @@ void setup() {
     for(int i = 0; i<gTotalLayers; i++) {
         gTotalCountSegments += mSegmentAmounts[i];
     }
-    gCommands = malloc(gTotalCountSegments * sizeof(int*));
+    gCommands = (int**)malloc(gTotalCountSegments * sizeof(int*));
     for (int i = 0; i < gTotalCountSegments; i++) {
-      gCommands[i] = malloc(2 * sizeof(int));
+      gCommands[i] = (int*)malloc(2 * sizeof(int));
     }
     for(uint8_t i = 0; i<gTotalCountSegments; i++) {
         for(uint8_t j = 0; j<2; j++) {
@@ -76,11 +103,13 @@ void setup() {
     }
     Serial.println("(APP) \t\t done");
 
+    // attach actuators to pins
+    #include "inc/actuators_attach.h"
+
 
     Serial.println("(APP) \t\t creating objects...");
     for(uint8_t i = 0; i<gTotalLayers; i++) {
-        layerList[i].setup(i, gSegmentAmounts[i], 987);
-        // 987 = motor type
+        layerList[i].setup(i, gSegmentAmounts[i], gTypes[i], gIdentification[i], gExtraPin[i]);
     }
 
     for(uint8_t i = 0; i<gTotalLayers; i++) {
@@ -88,8 +117,17 @@ void setup() {
     }
 }
 void loop() {
+    // if mIsPlaying -> false
+        // check for input
+        // if button == true -> mIsPlaying
+            // layer.start()
+    // if mIsPlaying -> true
+        // check if allLayersFinished
+        // if yes -> mIsPlaying -> false
+            // break
+        // else
+            // layers.update()
 
-    // check for input
 
 
     // Serial.println(gTotalLayers);
@@ -98,12 +136,12 @@ void loop() {
     // Serial.println(gCommands[0][0]);
 
     unsigned long tCurrentMillis = millis();
-    if(tCurrentMillis - gPreviousPulse > gPulseInterval) {
+    // if(tCurrentMillis - gPreviousPulse > gPulseInterval) {
         // Serial.print("tick: ");
         // Serial.println(mSeconds);
         gPreviousPulse = tCurrentMillis;
         for(uint8_t i = 0; i<gTotalLayers; i++) {
             layerList[i].update();
         }   
-    } 
+    // } 
 }

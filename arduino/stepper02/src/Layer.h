@@ -2,21 +2,24 @@
 #define Layer_h
 #include <Arduino.h>
 #include <AccelStepper.h>
+#include <Servo.h>
 
 extern int gTotalLayers;
 extern int* gSegmentAmounts;
 extern int **gCommands;
 extern int gTotalCountSegments;
 extern AccelStepper *steppers[];
+extern Servo servos[];
 
 class Layer
 {
   public:
   	Layer();
-  	void setup(int tID, int tSegments, int tTypes);
+  	void setup(int tID, int tSegments, int tTypes, int tMotorID, int tExtraPin);
     void update();
     void start();
     void reset();
+    bool isFinished();
 
   private:
     long mLastMillis;
@@ -24,11 +27,15 @@ class Layer
   	int mID;
     int mMotorID; // for the respective array
     int mMotorType; // 0 = stepper; 1 = servo
-  	int** mCommands;
+    int mMotorPin;
+  	long** mCommands;
   	int mSegments; // how many segments are in this layer
   	int mCurrentSegment; // our pointer, which current segment
-  	int mCurrentRuntime; // how long this segment runs, in ms
+  	long mCurrentRuntime; // how long this segment runs, in ms
   	int mCurrentSteps;
+    int mServoPos;
+    int mServoGoTo;
+    int mServoIncrement;
     bool mFinished;
 };
 
