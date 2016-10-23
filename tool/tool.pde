@@ -92,6 +92,7 @@ void setup() {
   // add some things
   timeline = new Timeline(mTotalPlayTime);
   header.loadTimeline();
+  header.loadSettings();
   // motors.add(new Motor("Motor S", 1, true));
   // timeline.add();
 
@@ -178,9 +179,9 @@ void keyPressed() {
     } else if (keyCode == DOWN) {
       header.scrollDown();
     } else if (keyCode == LEFT) {
-      timeline.add();
+      // timeline.add();
     } else if (keyCode == RIGHT) {
-      timeline.remove();
+      // timeline.remove();
     }
   }
 }

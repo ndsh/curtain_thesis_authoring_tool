@@ -1,3 +1,18 @@
+/*
+  Test( String thePrefix ) {
+    cp5.addSlider( "value-"+thePrefix )
+       .setRange( 0, 255 )
+       .plugTo( this, "setValue" )
+       .setValue( 127 )
+       .setLabel("value")
+       ;
+  }
+
+  void setValue(int theValue) {
+    value = theValue;
+  }
+*/
+
 class Layer {
   ArrayList<Segment> segments;
   
@@ -33,6 +48,7 @@ class Layer {
   int mPinDir;
   int mPinEnable;
   int mPinStepperMode;
+  boolean mVisibility;
 
   Layer() {
     this(mLayerCounter);
@@ -79,14 +95,31 @@ class Layer {
           if(theEvent.getController().isMousePressed()) addQueue();
         } else if (theEvent.getController().getName().equals("removeSegment"+mID)) {
           // if(theEvent.getController().isMousePressed()) remove(); // das muss noch ausgebufft werdne. aktives element löschen?
+        } else if (theEvent.getController().getName().equals("toggle"+mID)) {
+          mVisibility = theEvent.getController().getValue()==1.0?true:false;
         }
         // println(mMotorMode + " /" + mMotorNumber + " /" + mPinStep + " /" + mPinDir + " /" + mPinEnable);
       }
     };
 
+
+    cp5.addToggle("toggle"+mID)
+     .setPosition(mTranslation.x-2, mLayerControls)
+     // .setPosition(-2,0)
+     .setSize(20,20)
+     .setValue(true)
+     // .setMode(ControlP5.SWITCH)
+     .setColorForeground(farbe.white())
+    .setColorBackground(farbe.light())
+    .setColorActive(farbe.dark())
+    .setColorCaptionLabel(farbe.normal())
+    .setColorValueLabel(farbe.normal())
+    .addCallback(cb)
+     ;
+
     cp5.addScrollableList("layerMode"+mID)
-      .setPosition(mTranslation.x-1, mLayerControls)
-      .setSize(200, 100)
+      .setPosition(mTranslation.x+30, mLayerControls)
+      .setSize(160, 100)
       .setBarHeight(20)
       .setItemHeight(20)
       .addItems(mLayerMode)
@@ -222,6 +255,8 @@ class Layer {
       .setColorCaptionLabel(farbe.normal())
       .setColorValueLabel(farbe.normal())
       ;
+
+
   }
   
   void add() {
@@ -338,10 +373,10 @@ class Layer {
     for (Segment segment : segments) {
       segment.update();
     }
-  } 
-  
-  void draw() {
-    if(!simulationMode) {
+  }
+
+  void toggle(boolean b) {
+    if(b) {
       cp5.getController("layerEnableDD"+mID).show();
       cp5.getController("labelEnable"+mID).show();
       cp5.getController("layerDirDD"+mID).show();
@@ -354,19 +389,8 @@ class Layer {
       cp5.getController("layerEnableDD"+mID).show();
       cp5.getController("labelSegments"+mID).show();
       cp5.getController("addSegment"+mID).show();
-
-      pushMatrix();
-      pushStyle();
-      translate(mTranslation.x, mTranslation.y);
-      noFill();
-      strokeWeight(2);
-      stroke(0, 0, 100);
-      rect(0, 0, mSize.x, mSize.y);
-      popStyle();
-      popMatrix();    
-      for (Segment segment : segments) {
-        segment.draw();
-      }
+      cp5.getController("labelStepperMode"+mID).show();
+      cp5.getController("layerStepperModeDD"+mID).show();
     } else {
       cp5.getController("layerEnableDD"+mID).hide();
       cp5.getController("labelEnable"+mID).hide();
@@ -380,6 +404,43 @@ class Layer {
       cp5.getController("layerEnableDD"+mID).hide();
       cp5.getController("labelSegments"+mID).hide();
       cp5.getController("addSegment"+mID).hide();
+      cp5.getController("labelStepperMode"+mID).hide();
+      cp5.getController("layerStepperModeDD"+mID).hide();
+    }
+  }
+  
+  void draw() {
+
+    toggle(mVisibility);
+    // if(getMotorMode() == 0) {
+    //   cp5.getController("layerDirDD"+mID).show();
+    //   cp5.getController("labelDir"+mID).show();
+    //   cp5.getController("layerStepDD"+mID).show();
+    //   cp5.getController("labelStep"+mID).show();
+    //   cp5.getController("labelStepperMode"+mID).show();
+    //   cp5.getController("layerStepperModeDD"+mID).show();
+    // } else if(getMotorMode() == 1 || getMotorMode() == 2) {
+    //   cp5.getController("layerDirDD"+mID).hide();
+    //   cp5.getController("labelDir"+mID).hide();
+    //   cp5.getController("layerStepDD"+mID).hide();
+    //   cp5.getController("labelStep"+mID).hide();
+    //   cp5.getController("labelStepperMode"+mID).hide();
+    //   cp5.getController("layerStepperModeDD"+mID).hide();
+    // }
+          
+    if(!simulationMode) {
+      pushMatrix();
+      pushStyle();
+      translate(mTranslation.x, mTranslation.y);
+      noFill();
+      strokeWeight(2);
+      stroke(0, 0, 100);
+      rect(0, 0, mSize.x, mSize.y);
+      popStyle();
+      popMatrix();    
+      for (Segment segment : segments) {
+        segment.draw();
+      }
     }
   }
 
@@ -389,8 +450,8 @@ class Layer {
     mTranslation = new PVector(leftMargin, (header.getHeight()+mSize.y/2+((getPosition()))*mSize.y)+(mSize.y/1.2*getPosition()));
     mLayerControls = mTranslation.y+mSize.y+3; // does not work. have to update all controls one by one
     // cp5.getController("sliderTime"+mUniqueID).setPosition(mPosition.x+3,mPosition.y+mSize.y+4);
-
-    cp5.getController("layerMode"+mID).setPosition(mTranslation.x-1, mLayerControls);    
+    cp5.getController("toggle"+mID).setPosition(mTranslation.x-2, mLayerControls);    
+    cp5.getController("layerMode"+mID).setPosition(mTranslation.x+30, mLayerControls);    
 
     cp5.getController("labelEnable"+mID).setPosition(mTranslation.x+265, mLayerControls+4);
     cp5.getController("layerEnableDD"+mID).setPosition((mTranslation.x)+310, mLayerControls);

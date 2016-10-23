@@ -29,7 +29,7 @@ class Segment {
 
   // display where the current cm is right now at any given point of time
   Segment(Layer tLayer) {
-    this(tLayer, 0, new PVector(random(tLayer.mTranslation.x, tLayer.mSize.x), tLayer.mTranslation.y+tLayer.mMargin), new PVector((int)random(50,200), tLayer.mSize.y-7));
+    this(tLayer, 0, new PVector(random(tLayer.mTranslation.x, tLayer.mSize.x), tLayer.mTranslation.y+tLayer.mMargin), new PVector(50, tLayer.mSize.y-7));
     
   }
 
@@ -54,26 +54,30 @@ class Segment {
           } else if (theEvent.getController().getName().equals("removeSegment"+mUniqueID)) {
             if(theEvent.getController().isMousePressed()) removeYourself();
           } else if (theEvent.getController().getName().equals("timeInput"+mUniqueID)) {
-            if(theEvent.getController().isUpdate()) mTargetDirection = (int)theEvent.getController().getValue();
+            if(theEvent.getController().isActive()) {
+              mTargetDirection = parseInt(theEvent.getController().getStringValue());
+              // println(theEvent.getController().getValue());
+
+            }
           }
         }
     };
-    cp5.addSlider("sliderTime"+mUniqueID)
-    .setCaptionLabel("cm")
-    .setPosition(mPosition.x,mPosition.y)
-    .setSize(120,16)
-    .setRange(-2000,2000)
-    .setNumberOfTickMarks(1600)
-    .setValue(0)
-    .setColorForeground(farbe.light())
-    .setColorBackground(farbe.white())
-    .setColorActive(farbe.light())
-    .setColorCaptionLabel(farbe.normal())
-    .setColorValueLabel(farbe.normal())
-    .showTickMarks(false)
-    .addCallback(cb)
-    .hide()
-    ;
+    // cp5.addSlider("sliderTime"+mUniqueID)
+    // .setCaptionLabel("cm")
+    // .setPosition(mPosition.x,mPosition.y)
+    // .setSize(120,16)
+    // .setRange(-2000,2000)
+    // .setNumberOfTickMarks(1600)
+    // .setValue(0)
+    // .setColorForeground(farbe.light())
+    // .setColorBackground(farbe.white())
+    // .setColorActive(farbe.light())
+    // .setColorCaptionLabel(farbe.normal())
+    // .setColorValueLabel(farbe.normal())
+    // .showTickMarks(false)
+    // .addCallback(cb)
+    // .hide()
+    // ;
     cp5.addButton("removeSegment"+mUniqueID)
     .setPosition(mPosition.x,mPosition.y)
     .setSize(16,16)
@@ -84,15 +88,25 @@ class Segment {
     cp5.addTextfield("timeInput"+mUniqueID)
      .setPosition(mPosition.x,mPosition.y)
      .setAutoClear(false)
-     .setValue("lala")
+     .setValue(str(mTargetDirection))
+     .setSize(120,16)
+     .onChange(cb)
+     .onLeave(cb)
+
+     .setInputFilter(ControlP5.INTEGER)
+     .setColorForeground(farbe.white())
+      .setColorBackground(farbe.light())
+      .setColorActive(farbe.light())
+      .setColorCaptionLabel(farbe.normal())
+      .setColorValueLabel(farbe.normal())
      ;
 
     if(mLayer.getMotorMode() == 1) { // servo
-      cp5.getController("sliderTime"+mUniqueID).setCaptionLabel("angle");
+      // cp5.getController("sliderTime"+mUniqueID).setCaptionLabel("angle");
       // cp5.getController("sliderTime"+mUniqueID).setRange(0,170);
       // cp5.getController("sliderTime"+mUniqueID).setNumberOfTickMarks(170);
     } else if(mLayer.getMotorMode() == 2) { // dc
-      cp5.getController("sliderTime"+mUniqueID).setCaptionLabel("speed");
+      // cp5.getController("sliderTime"+mUniqueID).setCaptionLabel("speed");
       // cp5.getController("sliderTime"+mUniqueID).setRange(0,255);
       // cp5.getController("sliderTime"+mUniqueID).setNumberOfTickMarks(255);
     }
@@ -104,7 +118,7 @@ class Segment {
 
   void draw() {
     if(!simulationMode) {
-      cp5.getController("sliderTime"+mUniqueID).show();
+      // cp5.getController("sliderTime"+mUniqueID).show();
       cp5.getController("timeInput"+mUniqueID).show();
       cp5.getController("removeSegment"+mUniqueID).show();
 
@@ -168,7 +182,7 @@ class Segment {
       
     } else {
       cp5.getController("timeInput"+mUniqueID).hide();
-      cp5.getController("sliderTime"+mUniqueID).hide();
+      // cp5.getController("sliderTime"+mUniqueID).hide();
       cp5.getController("removeSegment"+mUniqueID).hide();
     }
     contextMenu(mContext);
@@ -179,21 +193,21 @@ class Segment {
   }
 
   void removeItems() {
-    cp5.getController("sliderTime"+mUniqueID).remove();
+    // cp5.getController("sliderTime"+mUniqueID).remove();
     cp5.getController("timeInput"+mUniqueID).remove();
     cp5.getController("removeSegment"+mUniqueID).remove();
   }
 
   void contextMenu(boolean b) {
     if(!simulationMode) {
-      cp5.getController("sliderTime"+mUniqueID).show();
+      // cp5.getController("sliderTime"+mUniqueID).show();
       cp5.getController("timeInput"+mUniqueID).show();
       cp5.getController("removeSegment"+mUniqueID).show();
       if(b) {
-        cp5.getController("sliderTime"+mUniqueID).setVisible(true);
+        // cp5.getController("sliderTime"+mUniqueID).setVisible(true);
         cp5.getController("removeSegment"+mUniqueID).setVisible(true);
         cp5.getController("timeInput"+mUniqueID).setVisible(true);
-        cp5.getController("sliderTime"+mUniqueID).setPosition(mPosition.x+3,mPosition.y+mSize.y+4);
+        // cp5.getController("sliderTime"+mUniqueID).setPosition(mPosition.x+3,mPosition.y+mSize.y+4);
         cp5.getController("removeSegment"+mUniqueID).setPosition(mPosition.x+mSize.x-16,mPosition.y+mSize.y+7);
         cp5.getController("timeInput"+mUniqueID).setPosition(mPosition.x+3,mPosition.y+mSize.y+4);
         pushMatrix();
@@ -206,12 +220,12 @@ class Segment {
         popStyle();
         popMatrix();
       } else {
-        cp5.getController("sliderTime"+mUniqueID).setVisible(false);
+        // cp5.getController("sliderTime"+mUniqueID).setVisible(false);
         cp5.getController("timeInput"+mUniqueID).setVisible(false);
         cp5.getController("removeSegment"+mUniqueID).setVisible(false);
       }
     } else {
-      cp5.getController("sliderTime"+mUniqueID).hide();
+      // cp5.getController("sliderTime"+mUniqueID).hide();
       cp5.getController("timeInput"+mUniqueID).hide();
       cp5.getController("removeSegment"+mUniqueID).hide();
     }
