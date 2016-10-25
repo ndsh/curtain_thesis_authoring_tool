@@ -28,7 +28,7 @@ DropdownList d1, d2, d3;
 Textlabel label1, label2;
 
 float mTotalPlayTime = 5*60; // in second
-float mStepResolution = 0.014; // 10 seconds = 14 cm
+float mStepResolution = 0.020; // 10 seconds = 14 cm
 Timeline timeline;
 UserInterface ui;
 
@@ -58,11 +58,14 @@ String mArduinoPath = "";
 
 boolean simulationMode = false;
 
+String os;
+
 void setup() {
   size(displayWidth, 400);
   surface.setResizable(true);
   mFont = loadFont("Inconsolata-Regular-13-smooth.vlw");
   textFont(mFont, 13);
+  os = System.getProperty("os.name");
 
   leftMargin = 10; // the margin to the left side
   rightMargin = leftMargin*2;
@@ -80,12 +83,8 @@ void setup() {
   farbe = new Farbe();
   ui = new UserInterface();
   header = new Header();
-
   
   previousWidth = width;
-
-  
-  
 
   background(farbe.normal());
 
@@ -96,10 +95,38 @@ void setup() {
   // motors.add(new Motor("Motor S", 1, true));
   // timeline.add();
 
-  String tLines[] = loadStrings("data/settings/settings.cfg");
-  if(tLines.length > 0) if(tLines[0].length() > 0) mArduinoPath = tLines[0]+"/";
+  String tLines[] = loadStrings("settings.cfg");
+  println("loaded path for export config in: "+ tLines[0]);
+  if(tLines.length > 0) {
+    if(tLines[0].length() > 0) {
+      if(os.equals("Mac OS X")) {
+        // println("os x");
+        // println(pathSplit(tLines[0], "/"));
+        mArduinoPath = "/"+pathSplit(tLines[0], "/");
+      } else {
+        // println("different os");
+        // println(pathSplit(tLines[0], "\\"));
+        mArduinoPath = pathSplit(tLines[0], "\\");
+      }
+    }
+  }
 
   timeline.getExport();
+}
+
+String pathSplit(String value, String delim) {
+  String[] splitter = split(value, delim);
+  String newPath = "";
+  int counter = 0;
+  for(String s : splitter) {
+    if(!s.equals("")) {
+    if(counter!=0) newPath += delim;
+    newPath = newPath + s;
+    counter++;
+    }
+  }
+  newPath += delim;
+  return newPath;
 }
 
 void draw() {
@@ -184,6 +211,13 @@ void keyPressed() {
       // timeline.remove();
     }
   }
+}
+
+void mouseWheel(MouseEvent event) {
+  float e = event.getCount();
+  // println(e);
+  if(e > 0) header.scrollUp();
+  else header.scrollDown();
 }
 
 void folderSelected(File selection) {

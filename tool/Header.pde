@@ -77,8 +77,8 @@ class Header {
 		.setCaptionLabel("Minutes")
 		.setPosition(leftMargin+200,mOrigin.y+(mDimensions.y/2)-11)
 		.setSize(90,16)
-		.setRange(1,10)
-		.setNumberOfTickMarks(10)
+		.setRange(1,20)
+		// .setNumberOfTickMarks(10)
 		.setValue(5)
 		.setColorForeground(farbe.dark())
        	.setColorBackground(farbe.normal())
@@ -252,7 +252,11 @@ class Header {
 	    cp5.saveProperties();
 
 	    String[] stringList = { mArduinoPath };
-	    saveStrings("data/settings/settings.cfg", stringList);
+	    if(os.equals("Mac OS X")) {
+	    	saveStrings("data/settings.cfg", stringList);
+	    } else {
+	    	saveStrings("data\\settings.cfg", stringList);
+	    }
 	}
 
 
@@ -348,6 +352,7 @@ class Header {
 		for (Layer layer : timeline.getLayers()) {
 			if(layer.getMotorMode() == 1) {
 				output.println("servos["+counter+"].attach("+layer.getPinEnable()+");");
+				output.println("servos["+counter+"].write(0);");
 				counter++;
 			}
 		}
@@ -470,15 +475,24 @@ class Header {
 		output.println("// tupels of commands");
 		output.println("// ordered by layer sequence");
 		output.println("// time in seconds, steps per second");
+		output.println();
+		output.println("// last update: "+ day() +"."+ month() +"."+ year() +" - "+ hour() +":"+ minute() +":"+second());
+		output.println();
 		counter = 0;
 		int previousValue = 0;
 		for ( ArrayList<PVector> u : timeline.getExport()) {
-			output.println("// LAYER "+counter);
-			println("// LAYER "+counter);
+			output.print("// LAYER "+counter);
+			print("// LAYER "+counter);
+			try {
+				output.print(" -> " + timeline.getLayers().get(counter).getMotorModeString());
+			} catch(Exception e) {
 
+			}
+			output.println();
 			for ( PVector o : u) {
 				println(o.x + "\t" + o.y + "\t" + o.z);
 				if(o.z != -1) { 
+					// NullException can occur on the following line. but when?
 					Segment s = timeline.getLayers().get(counter).getSegments().get((int)o.z);
 					if( timeline.getLayers().get(counter).getMotorMode() == 0) output.println("{"+(int)s.getTime()+","+s.getSteps()+"},");
 					else output.println("{"+(int)s.getTime()+","+(int)s.getDirection()+"},");
@@ -496,14 +510,15 @@ class Header {
 					// ???? FIX ****
 
 					if(timeline.getLayers().get(counter).getMotorMode() == 0 || timeline.getLayers().get(counter).getMotorMode() == 2) {
-						output.println("{"+(int)map(o.y, 0, maxWidth, 0, mTotalPlayTime)+",0},");
+						output.println("{"+(int)map(o.y, leftMargin, maxWidth, 0, mTotalPlayTime)+",0},");
 					} else if(timeline.getLayers().get(counter).getMotorMode() == 1) {
-						output.println("{"+(int)map(o.y, 0, maxWidth, 0, mTotalPlayTime)+","+previousValue+"},");
+						output.println("{"+(int)map(o.y, leftMargin, maxWidth, 0, mTotalPlayTime)+","+previousValue+"},");
 					}
 					// println(map(o.y, mGrabArea, width-30, 0, mTotalPlayTime));
 				}
 			}
 			counter++;
+			output.println();
 		}
 		output.flush();
   		output.close();

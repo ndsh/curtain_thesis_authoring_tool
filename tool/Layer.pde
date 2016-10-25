@@ -1,18 +1,3 @@
-/*
-  Test( String thePrefix ) {
-    cp5.addSlider( "value-"+thePrefix )
-       .setRange( 0, 255 )
-       .plugTo( this, "setValue" )
-       .setValue( 127 )
-       .setLabel("value")
-       ;
-  }
-
-  void setValue(int theValue) {
-    value = theValue;
-  }
-*/
-
 class Layer {
   ArrayList<Segment> segments;
   
@@ -109,7 +94,7 @@ class Layer {
      .setSize(20,20)
      .setValue(true)
      .setCaptionLabel("")
-     // .setMode(ControlP5.SWITCH)
+     .setMode(ControlP5.SWITCH)
      .setColorForeground(farbe.white())
     .setColorBackground(farbe.light())
     .setColorActive(farbe.dark())
@@ -347,6 +332,14 @@ class Layer {
     else if(mMotorMode == 2) type = 1;
     else if(mMotorMode == 3) type = 2;
     return type;
+  }
+
+  String getMotorModeString() {
+    int m = getMotorMode();
+    if(m == 0) return "Stepper";
+    else if(m == 1) return "Servo";
+    else if(m == 2) return "DC";
+    else return "Error: Undefined Motor Type";
   }
 
   int getMotorNumber() {

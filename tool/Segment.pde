@@ -54,8 +54,12 @@ class Segment {
           } else if (theEvent.getController().getName().equals("removeSegment"+mUniqueID)) {
             if(theEvent.getController().isMousePressed()) removeYourself();
           } else if (theEvent.getController().getName().equals("timeInput"+mUniqueID)) {
+            // mTargetDirection = parseInt(theEvent.getController().getStringValue());
+            mTargetDirection = parseInt(cp5.get(Textfield.class,"timeInput"+mUniqueID).getText());
+            // println(mTargetDirection);
+            //println();
             if(theEvent.getController().isActive()) {
-              mTargetDirection = parseInt(theEvent.getController().getStringValue());
+              
               // println(theEvent.getController().getValue());
 
             }
@@ -92,8 +96,12 @@ class Segment {
      .setSize(120,16)
      .onChange(cb)
      .onLeave(cb)
+     .onLeave(cb)
+     .onRelease(cb)
+     .onReleaseOutside(cb)
+     // .plugTo( this, "setValue" )
 
-     .setInputFilter(ControlP5.INTEGER)
+     // .setInputFilter(ControlP5.INTEGER)
      .setColorForeground(farbe.white())
       .setColorBackground(farbe.light())
       .setColorActive(farbe.light())
@@ -115,6 +123,10 @@ class Segment {
   void update() {
     if(gLocked == null) detect();
   }
+
+  // void setValue(float theValue) {
+  //   mTargetDirection = theValue;
+  // }
 
   void draw() {
     if(!simulationMode) {
@@ -214,9 +226,9 @@ class Segment {
         translate(mPosition.x, mPosition.y+mSize.y);
         pushStyle();
         fill(farbe.white());
-        rect(0,0, constrain(mSize.x, 100, mSize.x), 23);
+        rect(0,0, constrain(mSize.x, 140, mSize.x), 50);
         stroke(farbe.normal());
-        line(-1,-1,constrain(mSize.x, 100, mSize.x), -1);
+        line(-1,-1,constrain(mSize.x, 140, mSize.x), -1);
         popStyle();
         popMatrix();
       } else {
@@ -325,7 +337,8 @@ class Segment {
   }
 
   int getSteps() {
-    return (int)(mTargetDirection/(mStepResolution*getTime()));
+    int calc = (int)(abs(mTargetDirection)/(mStepResolution*getTime()));
+    return mTargetDirection>=0?calc:calc*-1;
   }
   
 
