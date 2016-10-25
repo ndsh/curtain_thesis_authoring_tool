@@ -1,0 +1,29 @@
+pins 2- 12
+interrupts: 2,3,18,19,20,21
+PWM: 2 to 13 and 44 to 46
+-----
+2 DC
+3 x -> servo
+4 x -> servo
+5 x -> servo
+6 x -> servo
+7 x -> servo
+8 x -> servo
+9 x -> servo
+10 x -> servo
+11 x -> servo
+12 x -> servo
+13 (LED!) DC
+44 
+45 
+46
+-----
+= 10 servos
+
+
+5 micro switches
+10 servos
+5 stepper (does not need pwm?) 6 pins per driver = 30 total
+2 dc motors (PWM)
+
+30+2+10+5analog
