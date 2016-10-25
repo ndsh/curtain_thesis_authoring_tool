@@ -28,7 +28,7 @@ class Layer
     int mMotorID; // for the respective array
     int mMotorType; // 0 = stepper; 1 = servo
     int mMotorPin;
-  	long** mCommands;
+  	int** mCommands;
   	int mSegments; // how many segments are in this layer
   	int mCurrentSegment; // our pointer, which current segment
   	long mCurrentRuntime; // how long this segment runs, in ms

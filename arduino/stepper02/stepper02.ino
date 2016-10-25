@@ -28,7 +28,7 @@ bool mAllLayersFinished = false;
 
 void setup() {  
 
-    // Serial.begin(9600);
+     Serial.begin(9600);
 
     Serial.print("(APP) \t\t ");
     Serial.println("starting!");

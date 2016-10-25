@@ -26,9 +26,9 @@ void Layer::setup(int tID, int tSegments, int tType, int tMotorID, int tExtraPin
 	
 	mSegments = tSegments;
 	mCurrentSegment = 0;
-	mCommands = (long**)malloc(mSegments * sizeof(int*));
+	mCommands = (int**)malloc(mSegments * sizeof(int*));
     for (int i = 0; i < mSegments; i++) {
-      mCommands[i] = (long*)malloc(2 * sizeof(int));
+      mCommands[i] = (int*)malloc(2 * sizeof(int));
     }
 
 	Serial.print("(LAYER) \t setting up layer ");
@@ -66,7 +66,7 @@ void Layer::setup(int tID, int tSegments, int tType, int tMotorID, int tExtraPin
 	// class mCommands class array
 	int tIncrement = 0;
 	for(int i = tCounter; i<(tCounter+mSegments); i++) {
-		
+
 		mCommands[tIncrement][0] = gCommands[i][0];
 		mCommands[tIncrement][1] = gCommands[i][1];
 		
@@ -100,7 +100,7 @@ void Layer::setup(int tID, int tSegments, int tType, int tMotorID, int tExtraPin
 	
 	/* +++++++ */
 
-	mCurrentRuntime = (mCommands[mCurrentSegment][0])*1000;
+	mCurrentRuntime = (long)(mCommands[mCurrentSegment][0])*1000;
 
 	mCurrentSteps = mCommands[mCurrentSegment][1];
 
@@ -122,7 +122,11 @@ void Layer::update() {
 			// Serial.print(mCurrentSteps);
 			// Serial.print("\t mCurrentRuntime ");
 			// Serial.println(mCurrentRuntime);
-			steppers[mMotorID]->setSpeed((mCurrentSteps*microStepping));
+			//Serial.print("?????");
+			int stepsCalc = mCurrentSteps*microStepping;
+			stepsCalc = constrain(stepsCalc, -15000, 15000);
+			//Serial.println(stepsCalc);
+			steppers[mMotorID]->setSpeed((int)(mCurrentSteps*microStepping));
 			steppers[mMotorID]->runSpeed();
 		} else if(mMotorType == 1) {
 			if(mServoPos != mServoGoTo) {
@@ -139,27 +143,35 @@ void Layer::update() {
 	    	if(mMotorType == 0) {
 	    		Serial.println("stepper change");
 	    	}
-			mCurrentSegment++;
+			mCurrentSegment++; // FUCK YOU POINTERSSSSS
 			if(mCurrentSegment == mSegments) {
 				mFinished = true;
 				Serial.print("layer ");
 				Serial.print(mID);
 				Serial.println(" finished");
-				analogWrite(mMotorPin, 0);
+				//analogWrite(mMotorPin, 0);
 			} else {
-				mCurrentRuntime = (mCommands[mCurrentSegment][0])*1000;
+				mCurrentRuntime = (long)(mCommands[mCurrentSegment][0])*1000;
 				mCurrentSteps = mCommands[mCurrentSegment][1];
 				Serial.print("changing segment in layer ");
 				Serial.print(mID);
 				Serial.print(" to ");
 			  	Serial.print(mCurrentSegment);
 			  	Serial.print(" - new speed: ");
-			  	Serial.println(mCurrentSteps);
+			  	Serial.print(mCommands[mCurrentSegment][1]);
+			  	Serial.print(" - time: ");
+			  	Serial.print("------\t\t");
+				Serial.println(mCurrentRuntime);
 
 			  	if(mMotorType == 0) {
+			  		//if(mCurrentSteps > 10000) digitalWrite(mMotorPin, LOW);
+			  		//else digitalWrite(mMotorPin, HIGH);
 					steppers[mMotorID]->setSpeed(0);
 					steppers[mMotorID]->runSpeed();
-					steppers[mMotorID]->setSpeed((mCurrentSteps*microStepping));
+					int stepsCalc = mCurrentSteps*microStepping;
+					stepsCalc = constrain(stepsCalc, -15000, 15000);
+					Serial.println((int)mCurrentSteps*microStepping);
+					steppers[mMotorID]->setSpeed((int)mCurrentSteps*microStepping);
 				} else if(mMotorType == 1) {
 					mServoGoTo = mCurrentSteps;
 					if(mServoPos < mServoGoTo) mServoIncrement = 1;
