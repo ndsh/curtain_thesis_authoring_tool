@@ -53,16 +53,9 @@ class Segment {
             mTargetDirection = (int)theEvent.getController().getValue();
           } else if (theEvent.getController().getName().equals("removeSegment"+mUniqueID)) {
             if(theEvent.getController().isMousePressed()) removeYourself();
-          } else if (theEvent.getController().getName().equals("timeInput"+mUniqueID)) {
+          } else if (theEvent.getController().getName().equals("targetInput"+mUniqueID)) {
             // mTargetDirection = parseInt(theEvent.getController().getStringValue());
-            mTargetDirection = parseInt(cp5.get(Textfield.class,"timeInput"+mUniqueID).getText());
-            // println(mTargetDirection);
-            //println();
-            if(theEvent.getController().isActive()) {
-              
-              // println(theEvent.getController().getValue());
-
-            }
+            mTargetDirection = parseInt(cp5.get(Textfield.class,"targetInput"+mUniqueID).getText());
           }
         }
     };
@@ -89,49 +82,31 @@ class Segment {
     .addCallback(cb)
     ;
 
-    cp5.addTextfield("timeInput"+mUniqueID)
-     .setPosition(mPosition.x,mPosition.y)
-     .setAutoClear(false)
-     .setValue(str(mTargetDirection))
-     .setSize(120,16)
-     .onChange(cb)
-     .onLeave(cb)
-     .onLeave(cb)
-     .onRelease(cb)
-     .onReleaseOutside(cb)
-     // .plugTo( this, "setValue" )
-
-     // .setInputFilter(ControlP5.INTEGER)
-     .setColorForeground(farbe.white())
-      .setColorBackground(farbe.light())
-      .setColorActive(farbe.light())
-      .setColorCaptionLabel(farbe.normal())
-      .setColorValueLabel(farbe.normal())
+    cp5.addTextfield("targetInput"+mUniqueID)
+    .setPosition(mPosition.x,mPosition.y)
+    .setAutoClear(false)
+    .setValue(str(mTargetDirection))
+    .setSize(120,16)
+    .onChange(cb)
+    .onLeave(cb)
+    .onLeave(cb)
+    .onRelease(cb)
+    .onReleaseOutside(cb)
+    .setCaptionLabel("Target")
+    .setColorForeground(farbe.white())
+    .setColorBackground(farbe.light())
+    .setColorActive(farbe.light())
+    .setColorCaptionLabel(farbe.normal())
+    .setColorValueLabel(farbe.normal())
      ;
-
-    if(mLayer.getMotorMode() == 1) { // servo
-      // cp5.getController("sliderTime"+mUniqueID).setCaptionLabel("angle");
-      // cp5.getController("sliderTime"+mUniqueID).setRange(0,170);
-      // cp5.getController("sliderTime"+mUniqueID).setNumberOfTickMarks(170);
-    } else if(mLayer.getMotorMode() == 2) { // dc
-      // cp5.getController("sliderTime"+mUniqueID).setCaptionLabel("speed");
-      // cp5.getController("sliderTime"+mUniqueID).setRange(0,255);
-      // cp5.getController("sliderTime"+mUniqueID).setNumberOfTickMarks(255);
-    }
-
   }
   void update() {
     if(gLocked == null) detect();
   }
 
-  // void setValue(float theValue) {
-  //   mTargetDirection = theValue;
-  // }
-
   void draw() {
     if(!simulationMode) {
-      // cp5.getController("sliderTime"+mUniqueID).show();
-      cp5.getController("timeInput"+mUniqueID).show();
+      cp5.getController("targetInput"+mUniqueID).show();
       cp5.getController("removeSegment"+mUniqueID).show();
 
       pushStyle();
@@ -149,8 +124,6 @@ class Segment {
       rect(mPosition.x, mPosition.y, mSize.x, mSize.y);
 
       // grab area
-      
-      // fill(360,100,100);
       rect(mPosition.x+mSize.x-mGrabArea+1, mPosition.y+1, mGrabArea-1, mSize.y-1);
       stroke(farbe.normal());
       // stroke(90,100,100);
@@ -189,12 +162,9 @@ class Segment {
       text(mLabel, 0,0);
       
       popStyle();
-      popMatrix();
-
-      
+      popMatrix();      
     } else {
-      cp5.getController("timeInput"+mUniqueID).hide();
-      // cp5.getController("sliderTime"+mUniqueID).hide();
+      cp5.getController("targetInput"+mUniqueID).hide();
       cp5.getController("removeSegment"+mUniqueID).hide();
     }
     contextMenu(mContext);
@@ -205,40 +175,34 @@ class Segment {
   }
 
   void removeItems() {
-    // cp5.getController("sliderTime"+mUniqueID).remove();
-    cp5.getController("timeInput"+mUniqueID).remove();
+    cp5.getController("targetInput"+mUniqueID).remove();
     cp5.getController("removeSegment"+mUniqueID).remove();
   }
 
   void contextMenu(boolean b) {
     if(!simulationMode) {
-      // cp5.getController("sliderTime"+mUniqueID).show();
-      cp5.getController("timeInput"+mUniqueID).show();
+      cp5.getController("targetInput"+mUniqueID).show();
       cp5.getController("removeSegment"+mUniqueID).show();
       if(b) {
-        // cp5.getController("sliderTime"+mUniqueID).setVisible(true);
         cp5.getController("removeSegment"+mUniqueID).setVisible(true);
-        cp5.getController("timeInput"+mUniqueID).setVisible(true);
-        // cp5.getController("sliderTime"+mUniqueID).setPosition(mPosition.x+3,mPosition.y+mSize.y+4);
-        cp5.getController("removeSegment"+mUniqueID).setPosition(mPosition.x+mSize.x-16,mPosition.y+mSize.y+7);
-        cp5.getController("timeInput"+mUniqueID).setPosition(mPosition.x+3,mPosition.y+mSize.y+4);
+        cp5.getController("targetInput"+mUniqueID).setVisible(true);
+        cp5.getController("removeSegment"+mUniqueID).setPosition(mPosition.x+160-16, mPosition.y+mSize.y+7);
+        cp5.getController("targetInput"+mUniqueID).setPosition(mPosition.x+3,mPosition.y+mSize.y+4);
         pushMatrix();
         translate(mPosition.x, mPosition.y+mSize.y);
         pushStyle();
         fill(farbe.white());
-        rect(0,0, constrain(mSize.x, 140, mSize.x), 50);
+        rect(0,0, 160, 50);
         stroke(farbe.normal());
-        line(-1,-1,constrain(mSize.x, 140, mSize.x), -1);
+        line(-1,-1,160, -1);
         popStyle();
         popMatrix();
       } else {
-        // cp5.getController("sliderTime"+mUniqueID).setVisible(false);
-        cp5.getController("timeInput"+mUniqueID).setVisible(false);
+        cp5.getController("targetInput"+mUniqueID).setVisible(false);
         cp5.getController("removeSegment"+mUniqueID).setVisible(false);
       }
     } else {
-      // cp5.getController("sliderTime"+mUniqueID).hide();
-      cp5.getController("timeInput"+mUniqueID).hide();
+      cp5.getController("targetInput"+mUniqueID).hide();
       cp5.getController("removeSegment"+mUniqueID).hide();
     }
   }
@@ -273,15 +237,26 @@ class Segment {
   }
 
   float getTime() {
-    //mTotalPlayTime
-    //mWidth
-    //length: 10-width-30
+    return map(mSize.x, 0, maxWidth, 0, mTotalPlayTime);
+    // println((int)map(6, 32, 1260, 0, 10*60)); hmmmmmm++++++++++++++ grabArea = 0?
+  }
 
-    return map(mSize.x, mGrabArea, width-30, 0, mTotalPlayTime);
+  float getTime(int factor) {
+    return map(mSize.x, 0, maxWidth, 0, mTotalPlayTime*factor);
   }
 
   String readableTime(float t) {
     return t<=60?(int)t+"s":(int)t/60+":"+(int)t%60+"min";
+  }
+
+  int getSteps() {
+    int calc = (int)(abs(mTargetDirection)/(mStepResolution*getTime()));
+    return mTargetDirection>=0?calc:calc*-1;
+  }
+
+  int getSteps(int factor) {
+    int calc = (int)(abs(mTargetDirection*factor)/(mStepResolution*getTime()));
+    return mTargetDirection>=0?calc:calc*-1;
   }
   
   void detect() {
@@ -292,7 +267,7 @@ class Segment {
         // if (mouseX >= mPosition.x && mouseX <= mPosition.x+mGrabArea && 
         // mouseY >= mPosition.y && mouseY <= mPosition.y+mSize.y) mGrab = 1; // grab area
         // else 
-          if (mouseX >= (mPosition.x+mSize.x)-mGrabArea && mouseX <= mPosition.x+mSize.x && 
+        if (mouseX >= (mPosition.x+mSize.x)-mGrabArea && mouseX <= mPosition.x+mSize.x && 
         mouseY >= mPosition.y && mouseY <= mPosition.y+mSize.y) mGrab = 2; // normal area
         else mGrab = 0;
     } else {
@@ -323,11 +298,8 @@ class Segment {
       else if(mGrab > 0) {
         if(mGrab == 2) mSize.x = ((int)(mouseX-mPosition.x)>=mSize.y?(int)(mouseX-mPosition.x):mSize.x);
         else if(mGrab == 1) {
-          //
-          //mWidth = (int)(mouseX-mPosition.x);
         }
       }
-      //mPosition.y = mouseY-yOffset; 
     }
   }
   
@@ -335,12 +307,4 @@ class Segment {
     mLocked = false;
     if(gLocked == this) gLocked = null;
   }
-
-  int getSteps() {
-    int calc = (int)(abs(mTargetDirection)/(mStepResolution*getTime()));
-    return mTargetDirection>=0?calc:calc*-1;
-  }
-  
-
-
 }

@@ -2,6 +2,7 @@ class Header {
 	PVector mDimensions;
 	CallbackListener cb;
 	String mLabel;
+	String mBarPosition;
 	int sliderTime;
 	Textlabel mTitle;
 	PVector mOrigin;
@@ -11,6 +12,7 @@ class Header {
 		mOrigin = new PVector(0,0);
 		mDimensions = new PVector(width, 88);
 		mLabel = "AUTHORING TOOL";
+		mBarPosition = "0:00";
 
 	    cb = new CallbackListener() {
 	        public void controlEvent(CallbackEvent theEvent) {
@@ -96,6 +98,11 @@ class Header {
 		.setPosition(leftMargin, mOrigin.y+(mDimensions.y/2))
 		.setColorValue(farbe.normal())
 		;
+		cp5.addTextlabel("timeBar")
+		.setText(mBarPosition)
+		.setPosition(leftMargin, mOrigin.y+(mDimensions.y/3))
+		.setColorValue(farbe.normal())
+		;
 		println("### (HEADER) created");
 	}
 	void draw() {
@@ -108,6 +115,8 @@ class Header {
 			cp5.getController(mLabel).show();
 			cp5.getController("addNewLayer").show();
 			cp5.getController("removeLayer").show();
+
+			cp5.getController("timeBar").setValueLabel(timeline.displayBarPosition());
 
 			pushMatrix();
 			pushStyle();
@@ -149,6 +158,7 @@ class Header {
 		cp5.getController("saveSettings").setPosition(width-(202+leftMargin),mOrigin.y+32);
 		cp5.getController("sliderTime").setPosition(leftMargin+200,mOrigin.y+(mDimensions.y/2)-11);
 		cp5.getController(mLabel).setPosition(leftMargin, mOrigin.y+(mDimensions.y/2));
+		cp5.getController("timeBar").setPosition(leftMargin, mOrigin.y+(mDimensions.y/3));
 		cp5.getController("addNewLayer").setPosition(width-(304+leftMargin),mOrigin.y+10);
 		cp5.getController("removeLayer").setPosition(width-(304+leftMargin),mOrigin.y+32);
 	}
@@ -469,7 +479,7 @@ class Header {
 		// segments.h
 		// tupels of commands
 		// ordered by layer sequence
-		print("### (HEADER) creating segments.h");
+		println("### (HEADER) creating segments.h");
 		output = createWriter(mArduinoPath+"segments.h");
 		output.println("// segments.h");
 		output.println("// tupels of commands");
@@ -485,34 +495,36 @@ class Header {
 			print("// LAYER "+counter);
 			try {
 				output.print(" -> " + timeline.getLayers().get(counter).getMotorModeString());
+				print(" -> " + timeline.getLayers().get(counter).getMotorModeString());
 			} catch(Exception e) {
 
 			}
+			println();
 			output.println();
+			previousValue = 0;
 			for ( PVector o : u) {
 				println(o.x + "\t" + o.y + "\t" + o.z);
+				int tMotorMode = timeline.getLayers().get(counter).getMotorMode();
 				if(o.z != -1) { 
 					// NullException can occur on the following line. but when?
-					Segment s = timeline.getLayers().get(counter).getSegments().get((int)o.z);
-					if( timeline.getLayers().get(counter).getMotorMode() == 0) output.println("{"+(int)s.getTime()+","+s.getSteps()+"},");
-					else output.println("{"+(int)s.getTime()+","+(int)s.getDirection()+"},");
-					previousValue = s.getSteps();
-					//  {
-					//   5, 20
-					// },
-					// println(s.getTime());
-					// println(s.getSteps());
-					
+					// println("trying to plot segment #"+ (int)o.z);
+					Segment s = timeline.getLayers().get(counter).getSegment((int)o.z);
+					if(tMotorMode == 0) {
+						output.println("{"+(int)s.getTime()+","+s.getSteps()+"},");
+						previousValue = s.getSteps(); // culprit?
+					} else {
+						int tDirection = (int)s.getDirection();
+						if(tMotorMode == 1) tDirection = constrain(tDirection, 0, 170);
+						else tDirection = constrain(tDirection, 0, 255);
+						output.println("{"+(int)s.getTime()+","+tDirection+"},");
+						previousValue = tDirection; // culprit?
+					}
 				} else {
-					//map(mSize.x, mGrabArea, width-30, 0, mTotalPlayTime)
-					
-
 					// ???? FIX ****
-
-					if(timeline.getLayers().get(counter).getMotorMode() == 0 || timeline.getLayers().get(counter).getMotorMode() == 2) {
-						output.println("{"+(int)map(o.y, leftMargin, maxWidth, 0, mTotalPlayTime)+",0},");
+					if(tMotorMode == 0 || tMotorMode == 2) {
+						output.println("{"+(int)map(o.y, 0, maxWidth, 0, mTotalPlayTime)+",000},");
 					} else if(timeline.getLayers().get(counter).getMotorMode() == 1) {
-						output.println("{"+(int)map(o.y, leftMargin, maxWidth, 0, mTotalPlayTime)+","+previousValue+"},");
+						output.println("{"+(int)map(o.y, 0, maxWidth, 0, mTotalPlayTime)+","+previousValue+"},");
 					}
 					// println(map(o.y, mGrabArea, width-30, 0, mTotalPlayTime));
 				}

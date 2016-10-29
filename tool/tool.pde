@@ -28,7 +28,7 @@ DropdownList d1, d2, d3;
 Textlabel label1, label2;
 
 float mTotalPlayTime = 5*60; // in second
-float mStepResolution = 0.020; // 10 seconds = 14 cm
+float mStepResolution = 0.014; // 10 seconds = 14 cm
 Timeline timeline;
 UserInterface ui;
 
@@ -89,7 +89,7 @@ void setup() {
   background(farbe.normal());
 
   // add some things
-  timeline = new Timeline(mTotalPlayTime);
+  timeline = new Timeline();
   header.loadTimeline();
   header.loadSettings();
   // motors.add(new Motor("Motor S", 1, true));
@@ -221,10 +221,10 @@ void mouseWheel(MouseEvent event) {
 }
 
 void folderSelected(File selection) {
-    if (selection == null) {
-      println("Window was closed or the user hit cancel.");
-    } else {
-      mArduinoPath = selection.getAbsolutePath() +"/";
-      println("User selected " + selection.getAbsolutePath());
-    }
+  if (selection == null) {
+    println("Window was closed or the user hit cancel.");
+  } else {
+    mArduinoPath = selection.getAbsolutePath() +"/";
+    println("User selected " + selection.getAbsolutePath());
   }
+}

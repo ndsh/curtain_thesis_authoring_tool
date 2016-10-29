@@ -5,7 +5,6 @@ class Timeline {
   ArrayList<Layer> layers = new ArrayList<Layer>();
   boolean mPlay = false;
   float mBarPosition = leftMargin;
-  float mTotalPlayTime;
   int mPrevMillis = 0;
   boolean mHover = false;
   boolean mLocked = false;
@@ -15,8 +14,8 @@ class Timeline {
   int mGrabArea = 20;
   boolean mQueued = false;
 
-  Timeline(float _mTotalPlayTime) {
-    this.mTotalPlayTime = _mTotalPlayTime;
+  Timeline() {
+    // this.mTotalPlayTime = _mTotalPlayTime;
     println("### (TIMELINE) created");
   }
   
@@ -62,8 +61,9 @@ class Timeline {
     }
     // not good yet
     if(mPlay) {
-      if(mPrevMillis != millis()) {
-        mBarPosition += 0.1;
+      if(millis()-mPrevMillis > 250) {
+        int tStep = (int)(maxWidth/mTotalPlayTime);
+        mBarPosition += tStep;
         mPrevMillis = millis();
       }
     }
@@ -106,7 +106,8 @@ class Timeline {
       if(mLocked) fill(mTimeBarColor,0,100);
     } else fill(mTimeBarColor,0,50);
     // rect(mBarPosition, mTimeBarWidth+headexr.getHeight(), mTimeBarWidth, height-(mTimeBarWidth*2));
-    line(mBarPosition,mTimeBarWidth+header.getHeight(),mBarPosition,height-(mTimeBarWidth*2));
+    float tBarPosition = constrain(mBarPosition, leftMargin, maxWidth);
+    line(tBarPosition, mTimeBarWidth+header.getHeight(), tBarPosition, height-(mTimeBarWidth*2));
     popStyle();
     //line(mBarPosition, 10, mBarPosition, height-10);
     
@@ -120,6 +121,20 @@ class Timeline {
     } else {
       mHover = false;
     }
+  }
+
+  float getBarPosition() {
+    return mBarPosition;
+  }
+
+  
+  String displayBarPosition() {
+    //return ""+mTotalPlayTime;
+    int seconds = ((int)map(timeline.getBarPosition(), 0, maxWidth, 0, mTotalPlayTime))%60;
+    String tSeconds = "";
+    if(seconds < 10) tSeconds = "0"+seconds;
+    else tSeconds = ""+seconds;
+    return ((int)map(timeline.getBarPosition(), 0, maxWidth, 0, mTotalPlayTime))/60+":"+ tSeconds;
   }
  
 
@@ -140,7 +155,8 @@ class Timeline {
   
   void mouseDragged() {
     if(mLocked) {
-      mBarPosition = mouseX-xOffset;
+      int tStep = (int)(maxWidth/mTotalPlayTime);
+      mBarPosition = (mouseX-xOffset);
     }
     
     for (Layer layer : layers) {
@@ -195,9 +211,10 @@ class Timeline {
           // println("max:" + maxWidth);
           // println("sorteds: "+layer.sortSegments());
           println("nulls: "+ layer.getNullSegments());
-          
+        
+        // println(tReturn);
        } 
-        tReturn.add(layer.sortSegments(layer.mergeLists(layer.getSegmentsWithID(), layer.getNullSegments())));
+        tReturn.add(layer.sortSegments(layer.mergeLists(layer.getSegmentsWithID(), layer.getNullSegments())));          
       // }
       
     }

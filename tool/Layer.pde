@@ -476,6 +476,15 @@ class Layer {
     return segments;
   }
 
+  Segment getSegment(int id) {
+    Segment tSegment = null;
+    for (Segment segment : segments) {
+      println(segment.getPosition() + " - " + segment.getID());
+      if(id == segment.getID()) tSegment = segment;
+    }
+    return tSegment;
+  }
+
   int countSegments() {
     return segments.size();
   }
@@ -538,7 +547,7 @@ class Layer {
       // println(sortedSegment.x-leftBorder);
       // there is something left from us
       
-      if(sortedSegment.x-leftBorder > leftMargin) {
+      if(sortedSegment.x-leftBorder > 0) { // this if is questionable **********************************
         // println(counter + " :: "+ (sortedSegment.x-leftBorder) + " is ok");
         PVector v = new PVector(leftBorder, (sortedSegment.x-leftBorder), -1);
         nullSegments.add(v);
