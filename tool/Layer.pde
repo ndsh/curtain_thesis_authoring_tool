@@ -426,9 +426,15 @@ class Layer {
       pushMatrix();
       pushStyle();
       translate(mTranslation.x, mTranslation.y);
+      // old style
+      /*
       noFill();
       strokeWeight(2);
       stroke(0, 0, 100);
+      */
+      strokeWeight(2);
+      fill(farbe.dark());
+      
       rect(0, 0, mSize.x, mSize.y);
       popStyle();
       popMatrix();    

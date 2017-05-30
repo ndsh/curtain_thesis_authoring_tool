@@ -61,7 +61,7 @@ class Timeline {
     }
     // not good yet
     if(mPlay) {
-      if(millis()-mPrevMillis > 250) {
+      if(millis()-mPrevMillis >= 1000) {
         int tStep = (int)(maxWidth/mTotalPlayTime);
         mBarPosition += tStep;
         mPrevMillis = millis();

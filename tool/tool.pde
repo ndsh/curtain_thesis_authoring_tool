@@ -61,7 +61,7 @@ boolean simulationMode = false;
 String os;
 
 void setup() {
-  size(displayWidth, 400);
+  size(displayWidth, 600);
   surface.setResizable(true);
   mFont = loadFont("Inconsolata-Regular-13-smooth.vlw");
   textFont(mFont, 13);
@@ -146,6 +146,7 @@ void draw() {
 
     fill(farbe.light());
     rect(0,0,width,height);
+
 
     stroke(farbe.white());
     translate(width/12*0, height/2);
