@@ -210,7 +210,7 @@ class Timeline {
         if(layer.getID() == 1) {
           // println("max:" + maxWidth);
           // println("sorteds: "+layer.sortSegments());
-          println("nulls: "+ layer.getNullSegments());
+          // println("nulls: "+ layer.getNullSegments());
         
         // println(tReturn);
        } 

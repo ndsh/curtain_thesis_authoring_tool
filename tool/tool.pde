@@ -27,7 +27,7 @@ ControlP5 cp5;
 DropdownList d1, d2, d3;
 Textlabel label1, label2;
 
-float mTotalPlayTime = 5*60; // in second
+float mTotalPlayTime = 10*60; // in second
 float mStepResolution = 0.014; // 10 seconds = 14 cm
 Timeline timeline;
 UserInterface ui;
@@ -111,27 +111,10 @@ void setup() {
     }
   }
 
-  timeline.getExport();
-}
-
-String pathSplit(String value, String delim) {
-  String[] splitter = split(value, delim);
-  String newPath = "";
-  int counter = 0;
-  for(String s : splitter) {
-    if(!s.equals("")) {
-    if(counter!=0) newPath += delim;
-    newPath = newPath + s;
-    counter++;
-    }
-  }
-  newPath += delim;
-  return newPath;
+  // timeline.getExport();
 }
 
 void draw() {
-  
-
   if(width != previousWidth) {
     maxWidth = width-rightMargin;
     timeline.updateTranslation();
@@ -145,12 +128,12 @@ void draw() {
   header.draw();
   
   if(mouseDebug) {
-  pushStyle();
-  stroke(255);
-  line(mouseX, mouseY, mouseX+33, mouseY+33);
-  line(mouseX+33, mouseY+33, mouseX+45, mouseY+33);
-  text(mouseX + "|" + mouseY, mouseX+50, mouseY+38);
-  popStyle();
+    pushStyle();
+    stroke(255);
+    line(mouseX, mouseY, mouseX+33, mouseY+33);
+    line(mouseX+33, mouseY+33, mouseX+45, mouseY+33);
+    text(mouseX + "|" + mouseY, mouseX+50, mouseY+38);
+    popStyle();
   }  
 
   if(timeline.getQueued()) timeline.add();
@@ -180,6 +163,21 @@ void draw() {
     popMatrix();
   }
   
+}
+
+String pathSplit(String value, String delim) {
+  String[] splitter = split(value, delim);
+  String newPath = "";
+  int counter = 0;
+  for(String s : splitter) {
+    if(!s.equals("")) {
+    if(counter!=0) newPath += delim;
+    newPath = newPath + s;
+    counter++;
+    }
+  }
+  newPath += delim;
+  return newPath;
 }
 
 void mousePressed() {

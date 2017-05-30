@@ -27,6 +27,8 @@ boolean reverse = false; // write here either 'true' or 'false'
 
 
 
+long prevMillis = 0;
+long interval = 50000;
 
 int selection = 2; // 1-5 ->(n-1)
 
@@ -73,6 +75,11 @@ void setup()
 void loop()
 {
   //if(millis() < 20000) {
+  if(millis()-prevMillis > interval){
+    reverse = !reverse;
+    prevMillis = millis();
+    delay(5000); 
+  }
   if (!reverse) stepper.setSpeed((newSpeed * microStepping));
   else stepper.setSpeed((newSpeed * microStepping) * -1);
   stepper.runSpeed();

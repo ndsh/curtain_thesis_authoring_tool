@@ -19,6 +19,7 @@ class Layer
     void update();
     void start();
     void reset();
+    void disable();
     bool isFinished();
 
   private:

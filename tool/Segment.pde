@@ -11,6 +11,7 @@ class Segment {
 
   //values we need to save into a file
   float mTargetDirection;
+  float mRuntime;
   PVector mPosition;
   PVector mSize;
 
@@ -56,6 +57,16 @@ class Segment {
           } else if (theEvent.getController().getName().equals("targetInput"+mUniqueID)) {
             // mTargetDirection = parseInt(theEvent.getController().getStringValue());
             mTargetDirection = parseInt(cp5.get(Textfield.class,"targetInput"+mUniqueID).getText());
+          } else if (theEvent.getController().getName().equals("durationInput"+mUniqueID)) {
+            //mTargetDirection = parseInt(cp5.get(Textfield.class,"durationInput"+mUniqueID).getText());
+            int tDuration = parseDuration(cp5.get(Textfield.class,"durationInput"+mUniqueID).getText());
+            mSize.x = getDuration(tDuration);
+          } else if (theEvent.getController().getName().equals("startingInput"+mUniqueID)) {
+            //mTargetDirection = parseInt(cp5.get(Textfield.class,"durationInput"+mUniqueID).getText());
+            int tDuration = parseDuration(cp5.get(Textfield.class,"startingInput"+mUniqueID).getText());
+            // mSize.x = getDuration(tDuration);
+            mPosition.x = getDuration(tDuration);
+            // mPosition.x = readableTimeNoLabels(getTime(tDuration));
           }
         }
     };
@@ -89,7 +100,6 @@ class Segment {
     .setSize(120,16)
     .onChange(cb)
     .onLeave(cb)
-    .onLeave(cb)
     .onRelease(cb)
     .onReleaseOutside(cb)
     .setCaptionLabel("Target")
@@ -98,7 +108,41 @@ class Segment {
     .setColorActive(farbe.light())
     .setColorCaptionLabel(farbe.normal())
     .setColorValueLabel(farbe.normal())
-     ;
+    ;
+
+    cp5.addTextfield("durationInput"+mUniqueID)
+    .setPosition(mPosition.x,mPosition.y)
+    .setAutoClear(false)
+    .setValue(readableTimeNoLabels(getTime()))
+    .setSize(120,16)
+    .onChange(cb)
+    .onLeave(cb)
+    .onRelease(cb)
+    .onReleaseOutside(cb)
+    .setCaptionLabel("Duration")
+    .setColorForeground(farbe.white())
+    .setColorBackground(farbe.light())
+    .setColorActive(farbe.light())
+    .setColorCaptionLabel(farbe.normal())
+    .setColorValueLabel(farbe.normal())
+    ;
+
+     cp5.addTextfield("startingInput"+mUniqueID)
+    .setPosition(mPosition.x,mPosition.y)
+    .setAutoClear(false)
+    .setValue(readableTimeNoLabels(getTime(mPosition.x)))
+    .setSize(120,16)
+    .onChange(cb)
+    .onLeave(cb)
+    .onRelease(cb)
+    .onReleaseOutside(cb)
+    .setCaptionLabel("Starting")
+    .setColorForeground(farbe.white())
+    .setColorBackground(farbe.light())
+    .setColorActive(farbe.light())
+    .setColorCaptionLabel(farbe.normal())
+    .setColorValueLabel(farbe.normal())
+    ;
   }
   void update() {
     if(gLocked == null) detect();
@@ -108,6 +152,8 @@ class Segment {
     if(!simulationMode) {
       cp5.getController("targetInput"+mUniqueID).show();
       cp5.getController("removeSegment"+mUniqueID).show();
+      cp5.getController("durationInput"+mUniqueID).show();
+      cp5.getController("startingInput"+mUniqueID).show();
 
       pushStyle();
       stroke(farbe.light());
@@ -135,9 +181,6 @@ class Segment {
       line(0,3,16,3);
       popMatrix();
       noStroke();
-      //text(mWidth, mPosition.x, mPosition.y+5);
-      //text("#"+mID, mPosition.x, mPosition.y+5);
-      //text(mPosition.x + "|" + mPosition.y, mPosition.x, mPosition.y+40);
       pushMatrix();
       pushStyle();
       translate(mPosition.x+10, mPosition.y+(mSize.y/2)+5);
@@ -156,7 +199,7 @@ class Segment {
       //mHover = false;
       
       fill(farbe.normal());
-      if(mSize.x > 110) mLabel = readableTime(getTime()) + " | "+ (int)mTargetDirection +"cm";
+      if(mSize.x > 110) mLabel = readableTime(getTime()) + " | "+ (int)mTargetDirection +"mm";
       else if(mSize.x <= 110 && mSize.x > 60) mLabel = readableTime(getTime());
       else mLabel = "";
       text(mLabel, 0,0);
@@ -166,6 +209,8 @@ class Segment {
     } else {
       cp5.getController("targetInput"+mUniqueID).hide();
       cp5.getController("removeSegment"+mUniqueID).hide();
+      cp5.getController("durationInput"+mUniqueID).hide();
+      cp5.getController("startingInput"+mUniqueID).hide();
     }
     contextMenu(mContext);
   }
@@ -177,22 +222,30 @@ class Segment {
   void removeItems() {
     cp5.getController("targetInput"+mUniqueID).remove();
     cp5.getController("removeSegment"+mUniqueID).remove();
+    cp5.getController("durationInput"+mUniqueID).remove();
+    cp5.getController("startingInput"+mUniqueID).remove();
   }
 
   void contextMenu(boolean b) {
     if(!simulationMode) {
       cp5.getController("targetInput"+mUniqueID).show();
       cp5.getController("removeSegment"+mUniqueID).show();
+      cp5.getController("durationInput"+mUniqueID).show();
+      cp5.getController("startingInput"+mUniqueID).show();
       if(b) {
         cp5.getController("removeSegment"+mUniqueID).setVisible(true);
         cp5.getController("targetInput"+mUniqueID).setVisible(true);
-        cp5.getController("removeSegment"+mUniqueID).setPosition(mPosition.x+160-16, mPosition.y+mSize.y+7);
+        cp5.getController("durationInput"+mUniqueID).setVisible(true);
+        cp5.getController("startingInput"+mUniqueID).setVisible(true);
+        cp5.getController("removeSegment"+mUniqueID).setPosition(mPosition.x+160-16, mPosition.y+mSize.y+2);
         cp5.getController("targetInput"+mUniqueID).setPosition(mPosition.x+3,mPosition.y+mSize.y+4);
+        cp5.getController("durationInput"+mUniqueID).setPosition(mPosition.x+3,mPosition.y+mSize.y+64);
+        cp5.getController("startingInput"+mUniqueID).setPosition(mPosition.x+3,mPosition.y+mSize.y+34);
         pushMatrix();
         translate(mPosition.x, mPosition.y+mSize.y);
         pushStyle();
         fill(farbe.white());
-        rect(0,0, 160, 50);
+        rect(0,0, 160, 110);
         stroke(farbe.normal());
         line(-1,-1,160, -1);
         popStyle();
@@ -200,10 +253,14 @@ class Segment {
       } else {
         cp5.getController("targetInput"+mUniqueID).setVisible(false);
         cp5.getController("removeSegment"+mUniqueID).setVisible(false);
+        cp5.getController("durationInput"+mUniqueID).setVisible(false);
+        cp5.getController("startingInput"+mUniqueID).setVisible(false);
       }
     } else {
       cp5.getController("targetInput"+mUniqueID).hide();
       cp5.getController("removeSegment"+mUniqueID).hide();
+      cp5.getController("durationInput"+mUniqueID).hide(); 
+      cp5.getController("startingInput"+mUniqueID).hide(); 
     }
   }
 
@@ -218,6 +275,10 @@ class Segment {
 
   PVector getSize() {
     return mSize;
+  }
+
+  float getRuntime() {
+    return mRuntime;
   }
   
   void setPosition(PVector p) {
@@ -241,6 +302,30 @@ class Segment {
     // println((int)map(6, 32, 1260, 0, 10*60)); hmmmmmm++++++++++++++ grabArea = 0?
   }
 
+  float getTime(float f) {
+    return map(mPosition.x, 0, maxWidth, 0, mTotalPlayTime);
+  }
+
+  int parseDuration(String s) {
+    int tReturn = 0;
+    String[] splitter = split(s, ':');
+    try {
+      if(splitter[1].length() > 0) {
+        tReturn = (parseInt(splitter[0])*60) + parseInt(splitter[1]);
+      }
+    }
+    catch(Exception e) {
+      tReturn = parseInt(splitter[0])*60;
+    }
+    // returns input in seconds
+    // return splitter;
+    return tReturn;
+  }
+  float getDuration(int tDuration) {
+    return map(tDuration, 0, mTotalPlayTime, 0, maxWidth);
+    // println((int)map(6, 32, 1260, 0, 10*60)); hmmmmmm++++++++++++++ grabArea = 0?
+  }
+
   float getTime(int factor) {
     return map(mSize.x, 0, maxWidth, 0, mTotalPlayTime*factor);
   }
@@ -249,8 +334,13 @@ class Segment {
     return t<=60?(int)t+"s":(int)t/60+":"+(int)t%60+"min";
   }
 
+  String readableTimeNoLabels(float t) {
+    return t<=60?"0:"+(int)t:(int)t/60+":"+(int)t%60;
+  }
+
   int getSteps() {
     int calc = (int)(abs(mTargetDirection)/(mStepResolution*getTime()));
+    calc = constrain(calc, 0, 1000);
     return mTargetDirection>=0?calc:calc*-1;
   }
 

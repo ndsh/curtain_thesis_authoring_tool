@@ -3,7 +3,7 @@ class Header {
 	CallbackListener cb;
 	String mLabel;
 	String mBarPosition;
-	int sliderTime;
+	int sliderTimer;
 	Textlabel mTitle;
 	PVector mOrigin;
 	
@@ -18,8 +18,9 @@ class Header {
 	        public void controlEvent(CallbackEvent theEvent) {
 				if (theEvent.getController().getName().equals("buttonExport")) {
 	            	if(theEvent.getController().isMousePressed()) export();
-				} else if (theEvent.getController().getName().equals("sliderTime")) {
+				} else if (theEvent.getController().getName().equals("sliderTimer")) {
 					mTotalPlayTime = theEvent.getController().getValue()*60;
+					// mTotalPlayTime = parseInt(cp5.get(Textfield.class,"sliderTimer").getText())*60;
 				} else if (theEvent.getController().getName().equals("buttonSaveTo")) {
 					if(theEvent.getController().isMousePressed()) selectFolder("Select a folder to process:", "folderSelected");
 				} else if (theEvent.getController().getName().equals("loadSettings")) {
@@ -75,13 +76,19 @@ class Header {
 		.setCaptionLabel("Remove Layer")
 		.addCallback(cb)
 		;
-		cp5.addSlider("sliderTime")
+		cp5.addTextlabel(mLabel)
+		.setText(mLabel)
+		.setPosition(leftMargin, mOrigin.y+(mDimensions.y/2))
+		.setColorValue(farbe.normal())
+		;
+
+		cp5.addSlider("sliderTimer")
 		.setCaptionLabel("Minutes")
 		.setPosition(leftMargin+200,mOrigin.y+(mDimensions.y/2)-11)
 		.setSize(90,16)
 		.setRange(1,20)
-		// .setNumberOfTickMarks(10)
-		.setValue(5)
+		.setNumberOfTickMarks(20)
+		.setValue(10)
 		.setColorForeground(farbe.dark())
        	.setColorBackground(farbe.normal())
        	.setColorActive(farbe.light())
@@ -89,15 +96,27 @@ class Header {
        	.setColorValueLabel(farbe.white())
        	.addCallback(cb)
 		;
-		cp5.getController("sliderTime")
-		.getCaptionLabel()
-		.align(ControlP5.RIGHT, ControlP5.BOTTOM_OUTSIDE)
-		.setPaddingX(0);
-		cp5.addTextlabel(mLabel)
-		.setText(mLabel)
-		.setPosition(leftMargin, mOrigin.y+(mDimensions.y/2))
-		.setColorValue(farbe.normal())
-		;
+		// cp5.getController("sliderTimer")
+		// .getCaptionLabel()
+		// .align(ControlP5.RIGHT, ControlP5.BOTTOM_OUTSIDE)
+		// .setPaddingX(0);
+
+		// cp5.addTextfield("sliderTimer")
+	 //    .setPosition(leftMargin+200,mOrigin.y+(mDimensions.y/2)-11)
+	 //    .setAutoClear(false)
+	 //    .setValue(str(0))
+	 //    .setSize(90,16)
+	 //    .onChange(cb)
+	 //    .onLeave(cb)
+	 //    .onRelease(cb)
+	 //    .onReleaseOutside(cb)
+	 //    .setCaptionLabel("Minutes")
+	 //    .setColorForeground(farbe.white())
+	 //    .setColorBackground(farbe.light())
+	 //    .setColorActive(farbe.light())
+	 //    .setColorCaptionLabel(farbe.normal())
+	 //    .setColorValueLabel(farbe.normal())
+	 //    ;
 		cp5.addTextlabel("timeBar")
 		.setText(mBarPosition)
 		.setPosition(leftMargin, mOrigin.y+(mDimensions.y/3))
@@ -111,7 +130,7 @@ class Header {
 			cp5.getController("buttonSaveTo").show();
 			cp5.getController("loadSettings").show();
 			cp5.getController("saveSettings").show();
-			cp5.getController("sliderTime").show();
+			cp5.getController("sliderTimer").show();
 			cp5.getController(mLabel).show();
 			cp5.getController("addNewLayer").show();
 			cp5.getController("removeLayer").show();
@@ -142,7 +161,7 @@ class Header {
 			cp5.getController("buttonSaveTo").hide();
 			cp5.getController("loadSettings").hide();
 			cp5.getController("saveSettings").hide();
-			cp5.getController("sliderTime").hide();
+			cp5.getController("sliderTimer").hide();
 			cp5.getController(mLabel).hide();
 			cp5.getController("addNewLayer").hide();
 			cp5.getController("removeLayer").hide();
@@ -156,7 +175,7 @@ class Header {
 		cp5.getController("buttonSaveTo").setPosition(width-(100+leftMargin),mOrigin.y+32);
 		cp5.getController("loadSettings").setPosition(width-(202+leftMargin),mOrigin.y+10);
 		cp5.getController("saveSettings").setPosition(width-(202+leftMargin),mOrigin.y+32);
-		cp5.getController("sliderTime").setPosition(leftMargin+200,mOrigin.y+(mDimensions.y/2)-11);
+		cp5.getController("sliderTimer").setPosition(leftMargin+200,mOrigin.y+(mDimensions.y/2)-11);
 		cp5.getController(mLabel).setPosition(leftMargin, mOrigin.y+(mDimensions.y/2));
 		cp5.getController("timeBar").setPosition(leftMargin, mOrigin.y+(mDimensions.y/3));
 		cp5.getController("addNewLayer").setPosition(width-(304+leftMargin),mOrigin.y+10);
@@ -202,8 +221,8 @@ class Header {
 					for(int j = 0; j<(layerData.getJSONObject(i).size()-1); j++) {
 						layer.add(
 							layerData.getJSONObject(i).getJSONObject("segment"+j).getFloat("direction"), 
-							new PVector(layerData.getJSONObject(i).getJSONObject("segment"+j).getFloat("positionX"),	layerData.getJSONObject(i).getJSONObject("segment"+j).getFloat("positionY")),
-							new PVector(layerData.getJSONObject(i).getJSONObject("segment"+j).getFloat("sizeX"),	layerData.getJSONObject(i).getJSONObject("segment"+j).getFloat("sizeY"))
+							new PVector(layerData.getJSONObject(i).getJSONObject("segment"+j).getFloat("positionX"), layerData.getJSONObject(i).getJSONObject("segment"+j).getFloat("positionY")),
+							new PVector(layerData.getJSONObject(i).getJSONObject("segment"+j).getFloat("sizeX"), layerData.getJSONObject(i).getJSONObject("segment"+j).getFloat("sizeY"))
 						);
 					}
 					// println(layerData.getJSONObject(i).getJSONObject("segment"+j));
@@ -244,6 +263,7 @@ class Header {
 				segmentData.setFloat("positionY", segment.getPosition().y);
 				segmentData.setFloat("sizeX", segment.getSize().x);
 				segmentData.setFloat("sizeY", segment.getSize().y);
+				segmentData.setFloat("runTime", segment.getRuntime());
 				layerData.setJSONObject("segment"+j, segmentData);
 				
 				j++;

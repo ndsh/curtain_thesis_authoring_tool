@@ -124,7 +124,7 @@ void Layer::update() {
 			// Serial.println(mCurrentRuntime);
 			//Serial.print("?????");
 			int stepsCalc = mCurrentSteps*microStepping;
-			stepsCalc = constrain(stepsCalc, -15000, 15000);
+			stepsCalc = constrain(stepsCalc, -15000, 15000); // this is a bit weird still. FIX! or re-think
 			//Serial.println(stepsCalc);
 			steppers[mMotorID]->setSpeed((int)(mCurrentSteps*microStepping));
 			steppers[mMotorID]->runSpeed();
@@ -192,8 +192,20 @@ void Layer::update() {
 }
 
 void Layer::start() {
-	mLastMillis = millis();
 	mFinished = false;
+	if(mMotorType == 0) {
+		steppers[mMotorID]->disableOutputs();
+		delay(10);
+		steppers[mMotorID]->enableOutputs();
+	}
+	else if(mMotorType == 1) servos[mMotorID].write(mServoPos);
+	mLastMillis = millis();
+}
+
+void Layer::disable() {
+	if(mMotorType == 0) {
+		steppers[mMotorID]->disableOutputs();
+	}
 }
 
 void Layer::reset() {
